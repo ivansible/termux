@@ -1,0 +1,23 @@
+---
+dependencies: []
+
+galaxy_info:
+  role_name: termux_core
+  author: "Ivan Andreev"
+  description: "install termux core on ubuntu"
+  company: "IvanSible"
+  license: MIT
+  min_ansible_version: 2.5
+
+  platforms:
+    - name: Ubuntu
+      versions:
+        - xenial
+        - bionic
+
+  galaxy_tags:
+    - linux
+    - ansible
+
+  github_branch: master
+...

@@ -1,0 +1,24 @@
+---
+dependencies: []
+
+galaxy_info:
+  role_name: termux_ubuntu
+  author: "Ivan Andreev"
+  description: "install ubuntu in termux on android"
+  company: "IvanSible"
+  license: MIT
+  min_ansible_version: 2.5
+
+  platforms:
+    - name: Ubuntu
+      versions:
+        - xenial
+        - bionic
+
+  galaxy_tags:
+    - android
+    - termux
+    - ubuntu
+
+  github_branch: master
+...

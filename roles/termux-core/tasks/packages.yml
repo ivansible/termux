@@ -1,0 +1,44 @@
+---
+- name: install utilities
+  command:
+    cmd: "pkg install {{ termux_packages_core |join(' ') }}"
+    stdin: "{{ termux_pkg_confirm }}"
+  register: pkg_result
+  changed_when: pkg_result.stdout is search(termux_pkg_changed)
+
+- name: prevent sleep
+  command: termux-wake-lock
+  changed_when: false
+  when: ansible_connection != 'docker'
+
+- name: add x11 repository
+  command:
+    cmd: "pkg install x11-repo"
+    stdin: "{{ termux_pkg_confirm }}"
+  register: pkg_result
+  changed_when: pkg_result.stdout is search(termux_pkg_changed)
+  when: termux_x11 |bool
+
+- name: install x11 programs
+  command:
+    cmd: "pkg install {{ termux_packages_x11 |join(' ') }}"
+    stdin: "{{ termux_pkg_confirm }}"
+  register: pkg_result
+  changed_when: pkg_result.stdout is search(termux_pkg_changed)
+  when: termux_x11 |bool
+
+- name: upgrade apt
+  command:
+    cmd: "pkg upgrade apt"
+    stdin: "{{ termux_pkg_confirm }}"
+  ignore_errors: true
+  register: pkg_result
+  changed_when: pkg_result.stdout is search(termux_pkg_changed)
+
+- name: upgrade packages
+  command:
+    cmd: "pkg upgrade"
+    stdin: "{{ termux_pkg_confirm }}"
+  register: pkg_result
+  changed_when: pkg_result.stdout is search(termux_pkg_changed)
+...

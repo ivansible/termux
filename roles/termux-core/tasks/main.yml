@@ -1,6 +1,28 @@
 ---
-- name: become root and install role
-  import_tasks: root.yml
-  become: true
-  tags: role_all
+- name: install termux packages
+  import_tasks: packages.yml
+  tags:
+    - termux_packages
+    - termux_core_all
+
+- name: configure termux environment
+  import_tasks: configure.yml
+  tags:
+    - termux_configure
+    - termux_core_all
+
+- name: setup proot in termux
+  import_tasks: proot.yml
+  when: proot_ubuntu |default('')
+  tags:
+    - termux_proot
+    - termux_ubuntu
+    - termux_core_all
+  vars:
+    ubuntu_dir: "{{ termux_ubuntu_dir }}"
+    ubuntu_fs: "{{ termux_ubuntu_fs }}"
+    codename: "{{ termux_ubuntu_codename }}"
+    image_host: "{{ termux_ubuntu_image_host }}"
+    tarball: "{{ termux_ubuntu_tarball }}"
+    start_script: "{{ termux_ubuntu_start_script }}"
 ...

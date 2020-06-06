@@ -1,0 +1,67 @@
+---
+- name: configure ssh daemon
+  template:
+    src: sshd.config
+    dest: "{{ termux_root_dir }}/usr/etc/ssh/sshd_config"
+
+- name: create host marker
+  copy:
+    content: "{{ inventory_hostname }}"
+    dest: "{{ ansible_user_dir }}/{{ inventory_hostname }}"
+    force: true
+
+- name: setup storage
+  command:
+    cmd: termux-setup-storage
+    creates: "{{ ansible_user_dir }}/storage"
+  when: ansible_connection != 'docker'
+
+- name: create new user profile
+  copy:
+    dest: "{{ ansible_user_dir }}/.profile"
+    content: |
+      #!{{ termux_root_dir }}/usr/bin/sh
+    force: false
+
+- name: make aliases in user profile, add /system/bin on PATH
+  blockinfile:
+    path: "{{ ansible_user_dir }}/.profile"
+    block: "{{ lookup('template', 'profile-aliases.sh') }}"
+
+- name: customize tmux
+  lineinfile:
+    path: "{{ ansible_user_dir }}/.tmux.conf"
+    line: "{{ item }}"
+    create: true
+  loop: "{{ termux_tmux_options }}"
+
+- name: authorize ssh keys
+  authorized_key:
+    user: root  # android users are 'fake'
+    manage_dir: false
+    path: "{{ ansible_user_dir }}/.ssh/authorized_keys"
+    key: "{{ lookup('pipe', keygen_cmd) }}"
+    comment: "{{ item |basename |regex_replace('[.]key$') }}"
+  vars:
+    # use '&&' in the pipe to fail on chmod errors
+    keygen_cmd: 'chmod 600 "{{ item }}" && ssh-keygen -y -f "{{ item }}"'
+  loop: "{{ termux_authorized_ssh_keys }}"
+  loop_control:
+    label: "{{ item |basename }}"
+
+- name: install ssh keys
+  copy:
+    src: "{{ item }}"
+    dest: "{{ ansible_user_dir }}/.ssh"
+    mode: 0600
+  loop: "{{ termux_installed_ssh_keys }}"
+  loop_control:
+    label: "{{ item |basename }}"
+
+- name: configure ssh
+  blockinfile:
+    path: "{{ ansible_user_dir }}/.ssh/config"
+    block: "{{ lookup('template', 'ssh.aliases') }}"
+    create: true
+    mode: 0600
+...

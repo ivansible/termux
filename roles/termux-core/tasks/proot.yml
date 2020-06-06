@@ -1,0 +1,80 @@
+---
+## adopted from https://github.com/Neo-Oli/termux-ubuntu/blob/master/ubuntu.sh
+
+- name: install proot
+  command:
+    cmd: "pkg install proot wget"
+    stdin: "{{ termux_pkg_confirm }}"
+  register: pkg_result
+  changed_when: pkg_result.stdout is search(termux_pkg_changed)
+
+- name: make directories
+  file:
+    state: directory
+    path: "{{ item }}"
+  loop:
+    - "{{ ubuntu_fs }}"
+    - "{{ ubuntu_dir }}/binds"
+
+- name: add image host to dns resolver in docker termux
+  ## add image host name in static hosts, see:
+  ## https://github.com/xeffyr/termux-docker#known-issues
+  block:
+    - name: add static hostname in docker termux
+      lineinfile:
+        path: /system/etc/static-dns-hosts.txt
+        line: "{{ image_host }}"
+        ## docker does not allow atomic updates of /etc/hosts
+        ## see https://github.com/ansible/ansible/issues/13981
+        ## see https://docs.docker.com/network/bridge/#differences-between-user-defined-bridges-and-the-default-bridge
+        unsafe_writes: true
+      register: _static_dns_hosts
+
+    - name: update static dns in docker termux
+      command: /system/bin/update-static-dns
+      when: _static_dns_hosts is changed
+  when: ansible_connection == 'docker'
+
+- name: download ubuntu image
+  shell:
+    cmd: |
+      case $(dpkg --print-architecture) in
+        aarch64)  arch="arm64" ;;
+        arm)      arch="armhf" ;;
+        amd64)    arch="amd64" ;;
+        i*86)     arch="i386"  ;;
+        x86_64)   arch="amd64" ;;
+        *)        echo "unknown architecture"; exit 1 ;;
+      esac
+      wget -nv -O "{{ tarball }}" "{{ url }}"
+    creates: "{{ tarball }}"
+  vars:
+    base_url: "https://{{ image_host }}/core/{{ codename }}/current"
+    url: "{{ base_url }}/ubuntu-{{ codename }}-core-cloudimg-${arch}-root.tar.gz"
+
+- name: decompress ubuntu image
+  command:
+    cmd: proot --link2symlink tar -xf "{{ tarball }}" --exclude=dev
+    chdir: "{{ ubuntu_fs }}"
+    creates: "{{ ubuntu_fs }}/bin/bash"
+
+- name: fix nameserver so that ubuntu can connect to the internet
+  lineinfile:
+    path: "{{ ubuntu_fs }}/etc/resolv.conf"
+    line: "nameserver {{ termux_ubuntu_core_nameserver }}"
+
+- name: create launch script
+  template:
+    src: start-script.sh
+    dest: "{{ start_script }}"
+    mode: 0755
+
+- name: install core utils in ubuntu
+  command:
+    cmd: "{{ start_script }} 'apt-get -qy update; apt-get -qy install {{ packages }}'"
+    creates: "{{ creates }}"
+  vars:
+    packages: "{{ termux_ubuntu_core_packages |join(' ') }}"
+    creates: "{{ ubuntu_fs }}{{ termux_ubuntu_core_creates }}"
+  ignore_errors: true
+...

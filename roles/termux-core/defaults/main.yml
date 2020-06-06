@@ -1,3 +1,92 @@
 ---
-# defaults for ivansible.termux_core
+termux_x11: false
+proot_ubuntu: ~
+
+termux_bash_aliases:
+  c: clear
+  g: grep
+  h: head
+  l: ls --color=auto --group-directories-first
+  ll: ls -l --color=auto --group-directories-first
+  md: mkdir
+  m: less -XCS
+  pg: ps -efa | grep -i
+  rmf: rm -f
+  rmr: rm -rf
+  t: tail
+  tt: tail -f
+  v: vim
+  wl: wc -l
+  sc: supervisorctl
+  ttt: tmux attach
+  sus: tsu -
+  ssu: sudo su -
+
+termux_tmux_options:
+  - 'set-option -g history-limit 22000'
+  - 'bind -n C-k clear-history'  # clear scroll buffer on Ctrl-K
+  - 'bind -n C-u copy-mode -u'   # show scroll buffer on Ctrl-U
+  - 'new-session'                # auto-create new sessions
+
+termux_internal_networks:
+  - '127.0.0.*'
+  - '10.33.*.*'
+  - '192.168.*.*'
+
+termux_ssh_config: |
+  Host localhost
+    Hostname 127.0.0.1
+    User termux
+
+termux_authorized_ssh_keys: []
+termux_installed_ssh_keys: []
+termux_ssh_config_items: []
+termux_ssh_config_footer: ""
+
+termux_packages_core:
+  - termux-api
+  - termux-tools
+  - termux-exec
+  - tsu
+  - openssh
+  - curl
+  - wget
+  - dnsutils
+  - tracepath
+  - less
+  - vim
+  - tmux
+  - mc
+  - ncdu
+  - rsync
+  - rclone
+
+termux_packages_x11:
+  - tigervnc
+  - fluxbox
+  - xorg-xauth
+  - xorg-xclock
+  - xorg-xhost
+
+termux_pkg_confirm: "y\n\n\n\n\n\n\n\n\n\n\n\n"
+termux_pkg_changed: 'packages will be installed'
+
+termux_ubuntu_image_host: partner-images.canonical.com
+
+termux_ubuntu_dir: "{{ termux_root_dir }}/home/ubuntu"
+termux_ubuntu_fs: "{{ termux_ubuntu_dir }}/root"
+termux_ubuntu_codename: "{{ proot_ubuntu |default('bionic') }}"
+termux_ubuntu_tarball: "{{ ubuntu_dir }}/image.tgz"
+termux_ubuntu_start_script: "{{ ubuntu_dir }}/start"
+
+termux_ubuntu_core_creates: /usr/bin/curl
+termux_ubuntu_core_packages:
+  - iputils-ping
+  - curl
+  - sudo
+  - openssh-client
+  - procps
+
+termux_ubuntu_core_nameserver: 1.1.1.1
+termux_ubuntu_core_path: /usr/local/sbin:/usr/local/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/games:/usr/local/games
 ...

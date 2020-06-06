@@ -1,0 +1,11 @@
+{% for item in termux_ssh_config_hosts %}
+Host {{ item.alias }}
+  Hostname {{ item.host }}
+{%   if item.port is defined %}
+  Port {{ item.port }}
+{%   endif %}
+{%   if item.user is defined %}
+  User {{ item.user }}
+{%   endif %}
+{% endfor %}
+{{ termux_ssh_config_footer |default('') }}

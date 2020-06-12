@@ -5,8 +5,10 @@
   command:
     cmd: "pkg install proot wget"
     stdin: "{{ termux_pkg_confirm }}"
+  environment:
+    DEBIAN_FRONTEND: noninteractive
   register: pkg_result
-  changed_when: pkg_result.stdout is search(termux_pkg_changed)
+  changed_when: pkg_result.stdout |default('') is search(termux_pkg_changed)
 
 - name: make directories
   file:

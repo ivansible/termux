@@ -1,4 +1,4 @@
-#!{{ termux_root_dir }}/usr/bin/bash
+#!{{ termux_bash }}
 cd $(dirname $0)
 ## unset LD_PRELOAD in case termux-exec is installed
 unset LD_PRELOAD

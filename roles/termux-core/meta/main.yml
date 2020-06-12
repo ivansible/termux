@@ -4,7 +4,7 @@ dependencies: []
 galaxy_info:
   role_name: termux_core
   author: "Ivan Andreev"
-  description: "install termux core on ubuntu"
+  description: "install termux core on android"
   company: "IvanSible"
   license: MIT
   min_ansible_version: 2.5
@@ -16,8 +16,8 @@ galaxy_info:
         - bionic
 
   galaxy_tags:
-    - linux
-    - ansible
+    - android
+    - termux
 
   github_branch: master
 ...

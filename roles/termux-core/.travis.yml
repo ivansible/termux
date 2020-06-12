@@ -27,7 +27,7 @@ matrix:
       env:
         - IVATEST_FIREWALL=ferm
       script:
-        - echo "do not test this role"
+        - echo "Skip role test"
         - echo molecule test -s localhost
 
     - name: test on bionic
@@ -35,7 +35,7 @@ matrix:
       env:
         - IVATEST_FIREWALL=ferm
       script:
-        - echo "do not test this role"
+        - echo "Skip role test"
         - echo molecule test -s localhost
 
     - name: tests in docker
@@ -45,7 +45,7 @@ matrix:
         - IVATEST_FIREWALL=none
       script:
         # run step by step to work around no-output delay with idempotence
-        - echo "do not test this role"
+        - echo "Skip role test"
         - echo molecule lint
         - echo molecule destroy
         - echo molecule dependency

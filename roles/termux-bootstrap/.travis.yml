@@ -27,14 +27,16 @@ matrix:
       env:
         - IVATEST_FIREWALL=ferm
       script:
-        - molecule test -s localhost
+        - echo "Skip role test"
+        - echo molecule test -s localhost
 
     - name: test on bionic
       dist: bionic
       env:
         - IVATEST_FIREWALL=ferm
       script:
-        - molecule test -s localhost
+        - echo "Skip role test"
+        - echo molecule test -s localhost
 
     - name: tests in docker
       dist: bionic
@@ -43,13 +45,14 @@ matrix:
         - IVATEST_FIREWALL=none
       script:
         # run step by step to work around no-output delay with idempotence
-        - molecule lint
-        - molecule destroy
-        - molecule dependency
-        - molecule syntax
-        - molecule create
-        - molecule converge
-        - travis_wait 30 molecule idempotence
-        - molecule verify
-        - molecule destroy
+        - echo "Skip role test"
+        - echo molecule lint
+        - echo molecule destroy
+        - echo molecule dependency
+        - echo molecule syntax
+        - echo molecule create
+        - echo molecule converge
+        - echo travis_wait 30 molecule idempotence
+        - echo molecule verify
+        - echo molecule destroy
 ...

@@ -43,9 +43,9 @@ jobs:
           sudo -H pip3 install docker jmespath boto3 mitogen molecule pytest testinfra
           # also pulled: ansible-lint yamllint flake8
 
-      - name: Run test
+      - name: Skip role test
         shell: bash
-        run: cd ivansible/$ROLE_NAME && molecule test -s $SCENARIO
+        run: cd ivansible/$ROLE_NAME && echo molecule test -s $SCENARIO
 
   docker_test:
     name: tests in docker
@@ -72,7 +72,7 @@ jobs:
           sudo -H pip3 install docker jmespath boto3 mitogen molecule pytest testinfra
           # also pulled: ansible-lint yamllint flake8
 
-      - name: Run test
+      - name: Skip role test
         shell: bash
-        run: cd ivansible/$ROLE_NAME && molecule test -s $SCENARIO
+        run: cd ivansible/$ROLE_NAME && echo molecule test -s $SCENARIO
 ...

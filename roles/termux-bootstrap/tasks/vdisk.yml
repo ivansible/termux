@@ -1,0 +1,49 @@
+---
+## Prerequisites (install manually):
+## - external sdcard
+## - magisk
+## - magisk module 'fbind'
+
+- name: install packages required to setup termux disk
+  command: "pkg install -qy {{ termux_packages_vdisk |join(' ') }}"
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+  register: pkg_result
+  changed_when: pkg_result.stdout |default('') is search(termux_pkg_changed)
+
+- name: setup termux access for external sdcard
+  command:
+    cmd: termux-setup-storage
+    creates: "{{ termux_sdcard_dir }}"
+
+- name: make a script to setup termux disk image on external sdcard
+  template:
+    src: make-vdisk.sh
+    dest: "{{ termux_mkdisk_script }}"
+    mode: 0750
+
+- name: create, format and fill termux disk image
+  command:
+    cmd: "{{ termux_bash }} {{ termux_mkdisk_script }}"
+    creates: "{{ termux_vdisk_image }}"
+  register: _termux_vdisk_setup
+
+- name: make a script to mount termux virtual disk
+  template:
+    src: fbind-termux.sh
+    dest: "{{ termux_bind_script }}"
+    mode: 0755
+  become: true
+
+- name: remount termux on virtual disk now
+  command: "/system/bin/sh {{ termux_bind_script }}"
+  become: true
+  when: _termux_vdisk_setup is changed
+
+- name: enable automount of termux disk on boot
+  lineinfile:
+    path: "{{ termux_fbind_dir }}/service.sh"
+    line: '. $modPath/termux.sh'
+    insertbefore: '^exit 0'
+  become: true
+...

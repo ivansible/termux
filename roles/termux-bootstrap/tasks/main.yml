@@ -1,6 +1,38 @@
 ---
-- name: become root and install role
-  import_tasks: root.yml
-  become: true
-  tags: role_all
+- name: update static dns in docker
+  raw: "grep -q termux.net /system/etc/hosts || /system/bin/update-static-dns"
+  register: cmd_result
+  changed_when: cmd_result.stdout |default('') is search(termux_pkg_changed)
+  when: ansible_connection == 'docker'
+  tags:
+    - termux_bootstrap_docker
+    - termux_boostrap_all
+
+- name: install python
+  raw: "command -v python || pkg install -qy python"
+  register: pkg_result
+  changed_when: pkg_result.stdout |default('') is search(termux_pkg_changed)
+  tags:
+    - termux_bootstrap_python
+    - termux_boostrap_all
+
+- name: check whether termux disk image already exists
+  stat:
+    path: "{{ termux_vdisk_image }}"
+    get_checksum: false
+    get_mime: false
+  register: _termux_vdisk_file
+  when: termux_vdisk |bool
+  tags:
+    - termux_boostrap_vdisk
+    - termux_boostrap_all
+
+- name: remount termux on large virtual disk
+  import_tasks: vdisk.yml
+  when:
+    - termux_vdisk |bool
+    # - not _termux_vdisk_file.stat.exists
+  tags:
+    - termux_boostrap_vdisk
+    - termux_boostrap_all
 ...

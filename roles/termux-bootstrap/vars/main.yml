@@ -1,3 +1,8 @@
 ---
-# vars for ivansible.termux_bootstrap
+## no interpolation here to prevent issues with mitogen
+termux_root_dir: /data/data/com.termux/files
+termux_bash: /data/data/com.termux/files/usr/bin/bash
+ansible_user_dir: /data/data/com.termux/files/home
+ansible_remote_tmp: /data/data/com.termux/files/home/.ansible/tmp
+ansible_python_interpreter: /data/data/com.termux/files/usr/bin/python
 ...

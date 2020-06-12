@@ -1,3 +1,25 @@
 ---
-# defaults for ivansible.termux_bootstrap
+termux_vdisk: false
+
+termux_vdisk_size: 3704  # 3.6G
+termux_vdisk_fstype: ext4
+termux_selinux_context: u:object_r:app_data_file:s0
+
+termux_sdcard_slug: external-1
+termux_bind_dir: "{{ termux_root_dir }}"
+termux_sdcard_dir: "{{ termux_bind_dir }}/home/storage/{{ termux_sdcard_slug }}"
+termux_vdisk_image: "{{ termux_sdcard_dir }}/ext/termux.img"
+
+termux_mkdisk_script: "{{ termux_sdcard_dir }}/setup-vdisk.sh"
+termux_bind_script: "{{ termux_fbind_dir }}/termux.sh"
+termux_fbind_dir: /sbin/.magisk/modules/fbind
+
+termux_packages_vdisk:
+  - coreutils
+  - tsu
+  - e2fsprogs
+  - rsync
+
+termux_pkg_confirm: "y{{ '\n' * 20 }}"
+termux_pkg_changed: 'packages will be installed'
 ...

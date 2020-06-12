@@ -1,0 +1,23 @@
+---
+dependencies: []
+
+galaxy_info:
+  role_name: termux_bootstrap
+  author: "Ivan Andreev"
+  description: "bootstrap termux"
+  company: "IvanSible"
+  license: MIT
+  min_ansible_version: 2.5
+
+  platforms:
+    - name: Ubuntu
+      versions:
+        - xenial
+        - bionic
+
+  galaxy_tags:
+    - linux
+    - ansible
+
+  github_branch: master
+...

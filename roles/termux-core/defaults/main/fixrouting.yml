@@ -1,0 +1,6 @@
+---
+termux_fixrouting: false
+
+termux_fixrouting_pref: 1
+termux_fixrouting_nets: [2000::/3]
+...

@@ -1,7 +1,7 @@
 ---
 - name: configure ssh daemon
   template:
-    src: sshd.config
+    src: termux/sshd.config
     dest: "{{ termux_root_dir }}/usr/etc/ssh/sshd_config"
 
 - name: create host marker
@@ -26,7 +26,7 @@
 - name: make aliases in user profile, add /system/bin on PATH
   blockinfile:
     path: "{{ ansible_user_dir }}/.profile"
-    block: "{{ lookup('template', 'profile-aliases.sh') }}"
+    block: "{{ lookup('template', 'termux/profile-aliases.sh') }}"
 
 - name: customize tmux
   lineinfile:
@@ -61,7 +61,7 @@
 - name: configure ssh
   blockinfile:
     path: "{{ ansible_user_dir }}/.ssh/config"
-    block: "{{ lookup('template', 'ssh.aliases') }}"
+    block: "{{ lookup('template', 'termux/ssh.aliases') }}"
     create: true
     mode: 0600
 ...

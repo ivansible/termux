@@ -11,7 +11,7 @@
     - termux_configure
     - termux_core_all
 
-- name: setup proot in termux
+- name: setup proot and bootstrap ubuntu in termux
   import_tasks: proot.yml
   when: proot_ubuntu |default('')
   tags:
@@ -25,4 +25,9 @@
     image_host: "{{ termux_ubuntu_image_host }}"
     tarball: "{{ termux_ubuntu_tarball }}"
     start_script: "{{ termux_ubuntu_start_script }}"
+    core_packages_args: "{{ termux_ubuntu_core_packages |join(' ') }}"
+
+- name: run postponed handlers now
+  meta: flush_handlers
+  tags: always
 ...

@@ -1,22 +1,18 @@
 ---
-- name: install utilities
-  command:
-    cmd: "pkg install {{ termux_packages_core |join(' ') }}"
-    stdin: "{{ termux_pkg_confirm }}"
+- name: install termux utilities
+  command: "pkg install -qy {{ termux_packages_core |join(' ') }}"
   environment:
     DEBIAN_FRONTEND: noninteractive
   register: pkg_result
   changed_when: pkg_result.stdout |default('') is search(termux_pkg_changed)
 
-- name: prevent sleep
+- name: prevent termux from sleep during setup
   command: termux-wake-lock
   changed_when: false
   when: ansible_connection != 'docker'
 
 - name: add x11 repository
-  command:
-    cmd: "pkg install x11-repo"
-    stdin: "{{ termux_pkg_confirm }}"
+  command: "pkg install -qy x11-repo"
   environment:
     DEBIAN_FRONTEND: noninteractive
   register: pkg_result
@@ -24,16 +20,14 @@
   when: termux_x11 |bool
 
 - name: install x11 programs
-  command:
-    cmd: "pkg install {{ termux_packages_x11 |join(' ') }}"
-    stdin: "{{ termux_pkg_confirm }}"
+  command: "pkg install -qy {{ termux_packages_x11 |join(' ') }}"
   environment:
     DEBIAN_FRONTEND: noninteractive
   register: pkg_result
   changed_when: pkg_result.stdout |default('') is search(termux_pkg_changed)
   when: termux_x11 |bool
 
-- name: upgrade packages
+- name: upgrade termux packages
   command:
     cmd: pkg upgrade
     stdin: "{{ termux_pkg_confirm }}"

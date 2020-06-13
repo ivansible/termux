@@ -1,2 +1,83 @@
 ---
+## see:
+## https://wiki.termux.com/wiki/Termux-services
+
+- name: install termux service framwork
+  command: "pkg install -qy termux-services"
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+  register: _services_install
+  changed_when: _services_install.stdout |default('') is search(termux_pkg_changed)
+
+- name: setup ssh service directory
+  shell:
+    cmd: |
+      pkg uninstall -qy openssh
+      pkg install   -qy openssh
+    creates: "{{ termux_svc_dir }}/sshd"
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+
+- name: activate termux service daemon
+  command: service-daemon restart
+  environment:
+    SVDIR: "{{ termux_svc_dir }}"
+    LOGDIR: "{{ termux_log_dir }}"
+  when: _services_install is changed
+
+
+- name: enable termux ssh service
+  command:
+    cmd: sv-enable sshd
+    removes: "{{ termux_svc_dir }}/sshd/down"
+  environment:
+    SVDIR: "{{ termux_svc_dir }}"
+    LOGDIR: "{{ termux_log_dir }}"
+  when: termux_ssh_autostart |bool
+
+- name: disable termux ssh service
+  command:
+    cmd: sv-disable sshd
+    creates: "{{ termux_svc_dir }}/sshd/down"
+  environment:
+    SVDIR: "{{ termux_svc_dir }}"
+    LOGDIR: "{{ termux_log_dir }}"
+  when: not termux_ssh_autostart |bool
+
+
+- name: make termux autostart script
+  template:
+    src: services/autostart.sh
+    dest: "{{ ansible_user_dir }}/autostart"
+    mode: 0755
+  vars:
+    wakelock_comment: "{{ termux_wakelock_autostart |bool |ternary('','#') }}"
+    ubuntu_ssh_comment: "{{ termux_ubuntu_ssh_autostart |bool |ternary('','#') }}"
+    ubuntu_start: "{{ termux_ubuntu_start_script }}"
+    root_dir: "{{ termux_root_dir }}"
+    boot_log: "{{ termux_log_dir }}/boot.log"
+
+- name: create directory for termux autostart script
+  file:
+    state: directory
+    path: "{{ ansible_user_dir }}/.termux/boot"
+
+- name: create link for termux autostart script
+  file:
+    state: link
+    src: ../../autostart
+    path: "{{ ansible_user_dir }}/.termux/boot/autostart"
+
+- name: check whether termux-boot is installed
+  stat:
+    path: /data/data/com.termux.boot
+  register: _termux_boot
+
+- name: remind user to install termux-boot
+  debug:
+    msg:
+      - "+------------------------------+"
+      - "|  Please install Termux:Boot  |"
+      - "+------------------------------+"
+  when: not _termux_boot.stat.exists
 ...

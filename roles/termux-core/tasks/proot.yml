@@ -2,9 +2,7 @@
 ## adopted from https://github.com/Neo-Oli/termux-ubuntu/blob/master/ubuntu.sh
 
 - name: install proot
-  command:
-    cmd: "pkg install proot wget"
-    stdin: "{{ termux_pkg_confirm }}"
+  command: "pkg install -qy proot wget"
   environment:
     DEBIAN_FRONTEND: noninteractive
   register: pkg_result

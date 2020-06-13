@@ -1,6 +1,9 @@
 ---
 termux_x11: false
 
+termux_wakelock_autostart: false
+termux_ssh_autostart: false
+
 termux_bash_aliases:
   c: clear
   g: grep
@@ -70,4 +73,7 @@ termux_packages_x11:
 
 termux_pkg_confirm: "y{{ '\n' * 20 }}"
 termux_pkg_changed: 'packages will be installed'
+
+termux_svc_dir: "{{ termux_root_dir }}/usr/var/service"
+termux_log_dir: "{{ termux_root_dir }}/usr/var/log"
 ...

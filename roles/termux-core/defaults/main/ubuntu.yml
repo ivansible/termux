@@ -3,11 +3,13 @@ proot_ubuntu: ~
 
 termux_ubuntu_user: termuntu
 termux_ubuntu_home: "/home/{{ termux_ubuntu_user }}"
-termux_ubuntu_root_login: false
+termux_ubuntu_locale: C.UTF-8  # C
 
 termux_ubuntu_ssh_port: "{{ ansible_port + 1}}"
+termux_ubuntu_ssh_autostart: false
+termux_ubuntu_root_login: false
 termux_ubuntu_nameserver: 1.1.1.1
-termux_ubuntu_locale: C.UTF-8  # C
+
 termux_ubuntu_image_host: partner-images.canonical.com
 
 termux_ubuntu_dir: "{{ termux_root_dir }}/home/ubuntu"

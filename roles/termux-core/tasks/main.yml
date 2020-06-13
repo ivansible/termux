@@ -18,6 +18,12 @@
     - termux_fixrouting
     - termux_core_all
 
+- name: setup termux services
+  import_tasks: services.yml
+  tags:
+    - termux_services
+    - termux_core_all
+
 - name: setup proot and bootstrap ubuntu in termux
   import_tasks: proot.yml
   when: proot_ubuntu |default('')

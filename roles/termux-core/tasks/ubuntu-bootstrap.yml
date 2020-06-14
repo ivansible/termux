@@ -1,0 +1,145 @@
+---
+- name: fix nameserver so ubuntu can connect to the internet
+  lineinfile:
+    path: "{{ ubuntu_fs }}/etc/resolv.conf"
+    line: "nameserver {{ termux_ubuntu_nameserver }}"
+
+- name: fix sudo issue "unable to resolve host localhost"
+  lineinfile:
+    path: "{{ ubuntu_fs }}/etc/hosts"
+    line: '127.0.0.1 localhost'
+
+- name: fix sudo issue "unable to send audit message"
+  copy:
+    src: noaudit/noaudit.aarch64.so
+    dest: "{{ ubuntu_fs }}/lib/noaudit.aarch64.so"
+    mode: 0755
+  when: termux_ubuntu_noaudit_all |bool
+        or termux_ubuntu_noaudit_ssh |bool
+        or true  # FIXME
+
+- name: fix problems with chfn in proot ubuntu
+  ## see:
+  ## https://stackoverflow.com/questions/25193161/chfn-pam-system-error-intermittently-in-docker-hub-builds
+  ## https://github.com/Neo-Oli/termux-ubuntu/issues/42
+  file:
+    state: link
+    src: ../../bin/true
+    dest: "{{ ubuntu_fs }}/usr/bin/chfn"
+    force: true
+
+
+- name: install core ubuntu packages (long task, errors will be fixed)
+  command:
+    cmd: "{{ start_script }} '{{ cmd }}'"
+    creates: "{{ ubuntu_fs }}{{ termux_ubuntu_core_creates }}"
+  vars:
+    cmd: "apt-get -qy update; apt-get -qy install {{ core_packages_args }}"
+  register: _apt_result
+  ignore_errors: true
+
+- name: fix systemd install issues
+  block:
+    - name: fix chfn issue with systemd-network user
+      lineinfile:
+        path: "{{ systemd_postinst }}"
+        regexp: '^(.*--gecos "systemd Network Management" systemd-network)\s*$'
+        line: '\1 || true'
+        backrefs: true
+        when: stdout is search('chfn -f systemd Network Management .* returned error')
+
+    - name: fix chfn issue with systemd-resolver user
+      lineinfile:
+        path: "{{ systemd_postinst }}"
+        regexp: '^(.*--gecos "systemd Resolver" systemd-resolve)\s*$'
+        line: '\1 || true'
+        backrefs: true
+        when: stdout is search('chfn -f systemd Resolver .* returned error')
+
+    - name: fix systemd issue with stub-resolv.conf
+      lineinfile:
+        path: "{{ systemd_postinst }}"
+        regexp: '^(\s*cp /etc/resolv.conf .*/stub-resolv.conf)\s*$'
+        line: '\1 || true'
+        backrefs: true
+        when: stdout is search('/etc/resolv.conf.* are the same file')
+
+    - name: retry installing core packages in proot ubuntu
+      command: "{{ start_script }} '{{ cmd }}'"
+      vars:
+        cmd: "apt-get -qy update; apt-get -qy install {{ core_packages_args }}"
+      register: _apt_result
+
+  ## end of block
+  vars:
+    systemd_postinst: "{{ ubuntu_fs }}/var/lib/dpkg/info/systemd.postinst"
+    stdout: "{{ _apt_result.stdout |default('') }}"
+  when: stdout is search('error processing package systemd|Affected packages. systemd')
+
+
+- name: create non-root ubuntu user
+  command:
+    cmd: "{{ start_script }} '{{ cmd }}'"
+    stdin: "{{ termux_pkg_confirm }}"
+    creates: "{{ ubuntu_fs }}{{ termux_ubuntu_home }}"
+  vars:
+    cmd:
+      adduser
+        --quiet
+        --disabled-password
+        --home "{{ termux_ubuntu_home }}"
+        --gecos "{{ termux_ubuntu_user }}"
+        --shell /bin/bash
+        "{{ termux_ubuntu_user }}"
+
+- name: enable sudo for non-root ubuntu user
+  copy:
+    dest: "{{ ubuntu_fs }}/etc/sudoers.d/99-nopasswd"
+    content: |
+      # ansible-managed
+      %sudo ALL=(ALL) NOPASSWD:ALL
+      {{ termux_ubuntu_user }} ALL=(ALL) NOPASSWD:ALL
+    mode: 0640
+
+
+- name: authorize ssh keys with ubuntu users
+  authorized_key:
+    user: root  # fake user to avoid error in ansible module
+    manage_dir: false
+    path: "{{ ubuntu_fs }}/{{ item.0 }}/.ssh/authorized_keys"
+    key: "{{ lookup('pipe', keygen_cmd) }}"
+    comment: "{{ item.1 |basename |regex_replace('[.]key$') }}"
+  vars:
+    # use '&&' in the pipe to fail on chmod errors
+    keygen_cmd: 'chmod 600 "{{ item.1 }}" && ssh-keygen -y -f "{{ item.1 }}"'
+    homes:
+      - /root
+      - "{{ termux_ubuntu_home }}"
+  loop: "{{ homes |product(termux_authorized_ssh_keys) |list }}"
+  loop_control:
+    label: "{{ item.1 |basename }} -> {{ item.0 |basename }}"
+
+- name: configure sshd in proot ubuntu
+  template:
+    src: ubuntu/sshd.config
+    dest: "{{ ubuntu_fs }}/etc/ssh/sshd_config"
+  register: _sshd_config
+
+- name: fix ssh issue "linux_audit_write_entry failed"
+  lineinfile:
+    path: "{{ ubuntu_fs }}/etc/default/ssh"
+    line: "{{ comment }}{{ line }}"
+    regexp: "{{ line }}"
+  vars:
+    line: 'export LD_PRELOAD=/lib/noaudit.aarch64.so'
+    comment: "{{ termux_ubuntu_noaudit_ssh |bool |ternary('','#') }}"
+  register: _sshd_defaults
+
+- name: restart sshd in proot ubuntu
+  command: "{{ start_script }} '/etc/init.d/ssh restart'"
+  when: _sshd_config is changed
+        or _sshd_defaults is changed
+  ## workaround for hung init.s script
+  async: 10
+  poll: 0
+...

@@ -24,19 +24,29 @@
     - termux_services
     - termux_core_all
 
-- name: setup proot and bootstrap ubuntu in termux
+- name: setup ubuntu image in termux proot
   import_tasks: proot.yml
-  when: proot_ubuntu |default('')
+  when: termux_ubuntu |default('')
   tags:
     - termux_proot
+    - termux_ubuntu_bootstrap
+    - termux_core_all
+  vars:
+    ubuntu_fs: "{{ termux_ubuntu_fs }}"
+    start_script: "{{ termux_ubuntu_start_script }}"
+    codename: "{{ termux_ubuntu |default('bionic') }}"
+    image_host: "{{ termux_ubuntu_image_host }}"
+    tarball: "{{ termux_ubuntu_dir }}/image.tgz"
+
+- name: bootstrap ubuntu in termux
+  import_tasks: ubuntu-bootstrap.yml
+  when: termux_ubuntu |default('')
+  tags:
+    - termux_ubuntu_bootstrap
     - termux_ubuntu
     - termux_core_all
   vars:
-    ubuntu_dir: "{{ termux_ubuntu_dir }}"
     ubuntu_fs: "{{ termux_ubuntu_fs }}"
-    codename: "{{ termux_ubuntu_codename }}"
-    image_host: "{{ termux_ubuntu_image_host }}"
-    tarball: "{{ termux_ubuntu_tarball }}"
     start_script: "{{ termux_ubuntu_start_script }}"
     core_packages_args: "{{ termux_ubuntu_core_packages |join(' ') }}"
 

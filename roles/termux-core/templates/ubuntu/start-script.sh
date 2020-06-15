@@ -14,7 +14,5 @@ command+=" HOME=/root"
 command+=" PATH={{ termux_ubuntu_path }}"
 command+=" LANG={{ termux_ubuntu_locale }}"
 command+=" TERM=$TERM"
-{% set comment_noaudit = termux_ubuntu_noaudit_all |bool |ternary('','#') %}
-{{ comment_noaudit }}command+=" LD_PRELOAD=/lib/noaudit.aarch64.so"
 command+=" /bin/bash --login"
 [ -n "$1" ] && $command -c "$@" || exec $command

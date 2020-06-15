@@ -9,14 +9,20 @@
     path: "{{ ubuntu_fs }}/etc/hosts"
     line: '127.0.0.1 localhost'
 
-- name: fix sudo issue "unable to send audit message"
-  copy:
-    src: noaudit/noaudit.aarch64.so
-    dest: "{{ ubuntu_fs }}/lib/noaudit.aarch64.so"
-    mode: 0755
-  when: termux_ubuntu_noaudit_all |bool
-        or termux_ubuntu_noaudit_ssh |bool
-        or true  # FIXME
+- name: fix sudo/ssh failures due to android audit log
+  block:
+    - name: upload proot mod that emulates absent audit log
+      copy:
+        src: "{{ termux_ubuntu_noaudit_proot }}"
+        dest: "{{ proot_noaudit_deb }}"
+      register: fix_proot_audit_log
+
+    - name: install proot mod that emulates absent audit log
+      command: dpkg -i "{{ proot_noaudit_deb }}"
+      when: fix_proot_audit_log is changed
+  vars:
+    proot_noaudit_deb: "{{ termux_ubuntu_dir }}/proot_noaudit.deb"
+  when: termux_ubuntu_noaudit |bool
 
 - name: fix problems with chfn in proot ubuntu
   ## see:
@@ -125,19 +131,8 @@
     dest: "{{ ubuntu_fs }}/etc/ssh/sshd_config"
   register: _sshd_config
 
-- name: fix ssh issue "linux_audit_write_entry failed"
-  lineinfile:
-    path: "{{ ubuntu_fs }}/etc/default/ssh"
-    line: "{{ comment }}{{ line }}"
-    regexp: "{{ line }}"
-  vars:
-    line: 'export LD_PRELOAD=/lib/noaudit.aarch64.so'
-    comment: "{{ termux_ubuntu_noaudit_ssh |bool |ternary('','#') }}"
-  register: _sshd_defaults
-
 - name: restart sshd in proot ubuntu
   ## workaround for hung init.s script
   shell: "nohup {{ start_script }} '/etc/init.d/ssh restart' >/dev/null 2>&1 &"
   when: _sshd_config is changed
-        or _sshd_defaults is changed
 ...

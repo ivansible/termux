@@ -136,10 +136,8 @@
   register: _sshd_defaults
 
 - name: restart sshd in proot ubuntu
-  command: "{{ start_script }} '/etc/init.d/ssh restart'"
+  ## workaround for hung init.s script
+  shell: "nohup {{ start_script }} '/etc/init.d/ssh restart' >/dev/null 2>&1 &"
   when: _sshd_config is changed
         or _sshd_defaults is changed
-  ## workaround for hung init.s script
-  async: 10
-  poll: 0
 ...

@@ -11,10 +11,19 @@
     regexp: "^{{ item }}="
     line: "{{ item }}={{ termuntu_system_locale }}"
     create: true
-  loop:
-    - LANG
-    - LANGUAGE
+  loop: [LANG, LANGUAGE]
   when: termuntu_system_locale |default('')
+
+- name: set system locale on trusty
+  lineinfile:
+    path: /etc/profile.d/locale.sh
+    regexp: "^{{ item }}="
+    line: "{{ item }}={{ termuntu_system_locale }}"
+    create: true
+  loop: [LANG, LANGUAGE]
+  when:
+    - termuntu_system_locale |default('')
+    - ansible_lsb.codename == 'trusty'
 
 - name: set timezone
   ## avoid timezone module warning about failing timedatectl

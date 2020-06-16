@@ -18,14 +18,6 @@
     - termux_fixrouting
     - termux_core_all
 
-- name: install packages for shared memory
-  import_tasks: shmem.yml
-  when: termux_shmem |bool
-  tags:
-    - termux_shmem_all
-    - termux_core_shmem
-    - termux_core_all
-
 - name: setup termux services
   import_tasks: services.yml
   tags:

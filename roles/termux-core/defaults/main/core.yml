@@ -2,6 +2,8 @@
 termux_x11: false
 
 ## termux_shmem requires rooted android
+## /dev/shm step is in bootstrap (not here) because mitogen+become fails with
+## "UnicodeDecodeError: 'utf-8' codec can't decode byte 0xc0"
 termux_shmem: false
 
 termux_wakelock_autostart: false
@@ -65,6 +67,8 @@ termux_packages_core:
   - ncdu
   - rsync
   - rclone
+  ## shmem is required by ubuntu
+  - libandroid-shmem
 
 termux_packages_x11:
   - tigervnc

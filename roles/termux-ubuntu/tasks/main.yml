@@ -6,6 +6,14 @@
     - termux_ubuntu_all
     - termuntu_all
 
+- name: setup gui
+  import_tasks: gui.yml
+  become: true
+  when: termuntu_install_gui |bool
+  tags:
+    - termux_ubuntu_gui
+    - termuntu_all
+
 - name: run postponed handlers now
   meta: flush_handlers
   tags:

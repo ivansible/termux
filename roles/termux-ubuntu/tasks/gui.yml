@@ -1,0 +1,55 @@
+---
+- name: install libpam-systemd (required by gui on trusty)
+  block:
+    - name: install libpam-systemd (ok to fail, will rescue)
+      apt: name=libpam-systemd
+  rescue:
+    - name: fix install problems with libpam-systemd
+      lineinfile:
+        path: /var/lib/dpkg/info/libpam-systemd:armhf.postinst
+        regexp: '^(\s*{{ item }})\s*((?:\|\| exit \$\?\s*)?)$'
+        line: '\1 ||: #\2'
+        backrefs: true
+      loop:
+        - '/usr/share/update-notifier/notify-reboot-required'
+        - 'invoke-rc.d systemd-logind start'
+        - 'update-rc.d -f systemd-logind remove >/dev/null'
+
+    - name: install libpam-systemd (retry)
+      apt: name=libpam-systemd
+  when:
+    - ansible_machine == 'armv7l'
+    - ansible_lsb.codename == 'trusty'
+
+- name: install fuse (required by gui on trusty)
+  block:
+    - name: install fuse (ok to fail, will rescue)
+      apt: name=fuse
+  rescue:
+    - name: fix install problems with fuse
+      lineinfile:
+        path: /var/lib/dpkg/info/fuse.postinst
+        regexp: '^(\s*{{ item }})\s*$'
+        line: '\1 ||:'
+        backrefs: true
+      loop:
+        - 'MAKEDEV fuse'
+        - 'chown root:fuse /dev/fuse'
+        - 'chmod 0660 /dev/fuse'
+
+    - name: install fuse (retry)
+      apt: name=fuse
+  when:
+    - ansible_lsb.codename == 'trusty'
+
+- name: install gui packages (long task)
+  apt:
+    name: "{{ termuntu_gui_packages }}"
+
+- name: fix chromium issue with sandbox
+  lineinfile:
+    path: /usr/share/applications/chromium-browser.desktop
+    regexp: "^Exec=chromium-browser{{ item }}$"
+    line: "Exec=chromium-browser --no-sandbox{{ item }}"
+  loop: ['', ' %U']
+...

@@ -3,6 +3,7 @@ termuntu_system_locale: ~
 termuntu_timezone: ~
 termuntu_hostname: "{{ inventory_hostname }}"
 termuntu_name_android_groups: true
+termuntu_install_gui: true
 
 termuntu_core_packages:
   - tzdata
@@ -37,4 +38,12 @@ termuntu_core_packages:
   - vim
   - tmux
   - ncdu
+
+termuntu_gui_packages:
+  - xfce4
+  - xfce4-goodies
+  - firefox
+  - chromium-browser
+  - x11-apps
+  - xauth
 ...

@@ -1,6 +1,14 @@
 ---
-- name: become root and install role
+- name: perform root setup of ubuntu in termux
   import_tasks: root.yml
   become: true
-  tags: role_all
+  tags:
+    - termux_ubuntu_all
+    - termuntu_all
+
+- name: run postponed handlers now
+  meta: flush_handlers
+  tags:
+    - termux_ubuntu_all
+    - termuntu_all
 ...

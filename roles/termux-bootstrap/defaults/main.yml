@@ -3,7 +3,7 @@
 termux_shmem: false
 termux_vdisk: false
 
-termux_vdisk_size: 3704  # 3.6G
+termux_vdisk_size: 4000  # 4G
 termux_vdisk_fstype: ext4
 termux_selinux_context: u:object_r:app_data_file:s0
 

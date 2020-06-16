@@ -98,6 +98,11 @@
         --shell /bin/bash
         "{{ termux_ubuntu_user }}"
 
+- name: fix /usr/bin/sudo permissions
+  file:
+    path: "{{ ubuntu_fs }}/usr/bin/sudo"
+    mode: 04755
+
 - name: enable sudo for non-root ubuntu user
   copy:
     dest: "{{ ubuntu_fs }}/etc/sudoers.d/99-nopasswd"

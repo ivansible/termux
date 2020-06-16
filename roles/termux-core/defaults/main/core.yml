@@ -1,6 +1,9 @@
 ---
 termux_x11: false
 
+## termux_shmem requires rooted android
+termux_shmem: false
+
 termux_wakelock_autostart: false
 termux_ssh_autostart: false
 

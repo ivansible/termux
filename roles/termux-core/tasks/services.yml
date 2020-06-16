@@ -52,11 +52,14 @@
     mode: 0755
   vars:
     wakelock_comment: "{{ termux_wakelock_autostart |bool |ternary('','#') }}"
+    shmem_comment: "{{ termux_shmem |bool |ternary('','#') }}"
     termux_ssh_comment: "{{ termux_ssh_autostart |bool |ternary('','#') }}"
     ubuntu_ssh_comment: "{{ termux_ubuntu_ssh_autostart |bool |ternary('','#') }}"
     ubuntu_start: "{{ termux_ubuntu_start_script }}"
     root_dir: "{{ termux_root_dir }}"
     boot_log: "{{ termux_log_dir }}/boot.log"
+  tags:
+    - termux_shmem_all
 
 - name: create directory for termux autostart script
   file:

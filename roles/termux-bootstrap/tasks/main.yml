@@ -35,4 +35,12 @@
   tags:
     - termux_boostrap_vdisk
     - termux_boostrap_all
+
+- name: setup /dev/shm (required by ubuntu)
+  import_tasks: shmem.yml
+  when: termux_shmem |bool
+  tags:
+    - termux_shmem_all
+    - termux_boostrap_shmem
+    - termux_boostrap_all
 ...

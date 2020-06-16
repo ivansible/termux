@@ -1,0 +1,27 @@
+---
+## /dev/shm step is in bootstrap (vs core) because mitogen+become fails with
+## "UnicodeDecodeError: 'utf-8' codec can't decode byte 0xc0"
+
+- name: create /dev/shm (required by prooted ubuntu)
+  block:
+    - name: create /dev/shm (ok to fail, will rescue)
+      file:
+        path: /dev/shm
+        state: directory
+        owner: root
+        ## use numeric group 0 because ansible fails to find /etc/group
+        group: '0'
+        mode: 01777
+      become: true
+
+  rescue:
+    - name: install "su"
+      raw: "command -v su || pkg install -qy termux-tools"
+      register: pkg_result
+      changed_when: pkg_result.stdout |default('') is search(termux_pkg_changed)
+
+    - name: create /dev/shm (via "su")
+      command:
+        cmd: su -c "mkdir -p /dev/shm; chmod 1777 /dev/shm"
+        creates: /dev/shm
+...

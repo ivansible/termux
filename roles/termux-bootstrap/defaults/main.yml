@@ -1,4 +1,6 @@
 ---
+## vdisk and shmem require rooted android
+termux_shmem: false
 termux_vdisk: false
 
 termux_vdisk_size: 3704  # 3.6G

@@ -1,4 +1,5 @@
 ---
+termux_upgrade: true
 termux_x11: false
 
 ## termux_shmem requires rooted android

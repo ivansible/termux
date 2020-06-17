@@ -36,4 +36,5 @@
   register: pkg_result
   changed_when: pkg_result.stdout |default('') is search(termux_pkg_changed)
   ignore_errors: true
+  when: termux_upgrade |bool
 ...

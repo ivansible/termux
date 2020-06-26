@@ -37,7 +37,10 @@ termux_ubuntu_path: /usr/local/sbin:/usr/local/bin:/bin:/usr/bin:/sbin:/usr/sbin
 termux_ubuntu_noaudit: false
 termux_ubuntu_noaudit_proot: noaudit/proot_5.1.107-iva01_aarch64.deb
 
-## TODO: su issue "setgid:operation not permitted"
-## see:
-## https://github.com/proot-me/proot/issues/174
+## warning: using extra mounts is insecure
+termux_ubuntu_extra_mounts: false
+termux_sdcard_slug: external-1
+termux_sdcard_dir: "{{ termux_root_dir }}/home/storage/{{ termux_sdcard_slug }}"
+## note: use '/mnt/media_rw/SDCARD_ID' if you have magisk module 'ExtSDCard'
+termux_sdcard_abspath: "{{ termux_sdcard_dir }}"
 ...

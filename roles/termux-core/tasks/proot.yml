@@ -55,9 +55,33 @@
     chdir: "{{ ubuntu_fs }}"
     creates: "{{ ubuntu_fs }}/bin/bash"
 
+
+- name: set default absolute path of sdcard
+  set_fact:
+    termux_sdcard_dir_abspath: "{{ termux_sdcard_dir }}"
+  when: not termux_sdcard_abspath |default('',true)
+  tags: termux_core_sdcard
+
+- name: detect absolute path of sdcard mount point
+  stat:
+    path: "{{ termux_sdcard_dir }}"
+  register: _termux_sdcard_dir_stat
+  when: termux_sdcard_abspath is search('SDCARD_ID')
+  tags: termux_core_sdcard
+
+- name: substitute path of sdcard mount point
+  set_fact:
+    termux_sdcard_abspath: "{{ termux_sdcard_abspath |replace('SDCARD_ID',sdcard_id) }}"
+  vars:
+    link_target: "{{ _termux_sdcard_dir_stat.stat.lnk_target }}"
+    sdcard_id: "{{ link_target |regex_replace('^(.*)/([0-9A-Z-]+)/(.*)$','\\2') }}"
+  when: termux_sdcard_abspath is search('SDCARD_ID')
+  tags: termux_core_sdcard
+
 - name: create proot launch script
   template:
     src: ubuntu/start-script.sh
     dest: "{{ start_script }}"
     mode: 0750
+  tags: termux_core_sdcard
 ...

@@ -17,7 +17,7 @@ termux_bash_aliases:
   l: ls --color=auto --group-directories-first
   ll: ls -l --color=auto --group-directories-first
   md: mkdir
-  m: less -XCS
+  m: less -XCSR
   pg: ps -efa | grep -i
   rmf: rm -f
   rmr: rm -rf

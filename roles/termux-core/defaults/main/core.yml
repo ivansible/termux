@@ -46,8 +46,19 @@ termux_ssh_config: |
     Hostname 127.0.0.1
     User termux
 
-termux_authorized_ssh_keys: []
-termux_installed_ssh_keys: []
+termux_ssh_keys_accept: "{{ [ ssh_keys_accept |d([],true) ]
+                          | flatten |select |map('regex_findall','[^,]+') |flatten
+                         }}"
+termux_ssh_keys_deploy: "{{ [ ssh_keys_deploy |d([],true) ]
+                          | flatten |select |map('regex_findall','[^,]+') |flatten
+                         }}"
+termux_ssh_keys_revoke: "{{ [ ssh_keys_revoke |d([],true) ]
+                          | flatten |select |map('regex_findall','[^,]+') |flatten
+                         }}"
+ssh_keys_accept: ~
+ssh_keys_deploy: ~
+ssh_keys_revoke: ~
+
 termux_ssh_config_items: []
 termux_ssh_config_footer: ""
 

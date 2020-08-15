@@ -126,7 +126,7 @@
     homes:
       - /root
       - "{{ termux_ubuntu_home }}"
-  loop: "{{ homes |product(termux_authorized_ssh_keys) |list }}"
+  loop: "{{ homes |product(termux_ssh_keys_accept) |list }}"
   loop_control:
     label: "{{ item.1 |basename }} -> {{ item.0 |basename }}"
 

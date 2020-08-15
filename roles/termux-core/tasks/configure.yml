@@ -35,28 +35,61 @@
     create: true
   loop: "{{ termux_tmux_options }}"
 
-- name: authorize ssh keys
+
+- name: authorize new public ssh keys
   authorized_key:
     user: root  # android users are 'fake'
     manage_dir: false
     path: "{{ ansible_user_dir }}/.ssh/authorized_keys"
     key: "{{ lookup('pipe', keygen_cmd) }}"
-    comment: "{{ item |basename |regex_replace('[.]key$') }}"
+    comment: "{{ key_name }}"
+    state: present
   vars:
-    # use '&&' in the pipe to fail on chmod errors
+    key_name: "{{ item |basename |regex_replace('[.]key$') }}"
+    ## use '&&' in the pipe to fail on chmod errors
     keygen_cmd: 'chmod 600 "{{ item }}" && ssh-keygen -y -f "{{ item }}"'
-  loop: "{{ termux_authorized_ssh_keys }}"
+  loop: "{{ termux_ssh_keys_accept }}"
   loop_control:
-    label: "{{ item |basename }}"
+    label: "{{ key_name }}"
 
-- name: install ssh keys
+- name: make stub authorized keys if none were provided
+  copy:
+    dest: "{{ ansible_user_dir }}/.ssh/authorized_keys"
+    content: ""
+    mode: 0600
+    force: false
+
+- name: revoke obsolete public ssh keys
+  authorized_key:
+    user: root
+    manage_dir: false
+    path: "{{ ansible_user_dir }}/.ssh/authorized_keys"
+    key: "{{ lookup('pipe', keygen_cmd) }}"
+    state: absent
+  vars:
+    key_name: "{{ item |basename |regex_replace('[.]key$') }}"
+    keygen_cmd: 'chmod 600 "{{ item }}" && ssh-keygen -y -f "{{ item }}"'
+  loop: "{{ termux_ssh_keys_revoke }}"
+  loop_control:
+    label: "{{ key_name }}"
+
+- name: install new private ssh keys
   copy:
     src: "{{ item }}"
     dest: "{{ ansible_user_dir }}/.ssh"
     mode: 0600
-  loop: "{{ termux_installed_ssh_keys }}"
+  loop: "{{ termux_ssh_keys_deploy }}"
   loop_control:
     label: "{{ item |basename }}"
+
+- name: remove obsolete private ssh keys
+  file:
+    path: "{{ ansible_user_dir }}/.ssh/{{ item |basename }}"
+    state: absent
+  loop: "{{ termux_ssh_keys_revoke }}"
+  loop_control:
+    label: "{{ item |basename }}"
+
 
 - name: configure ssh
   blockinfile:

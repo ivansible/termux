@@ -36,9 +36,11 @@ termux_tmux_options:
   - 'bind -n C-u copy-mode -u'   # show scroll buffer on Ctrl-U
   - 'new-session'                # auto-create new sessions
 
+## configure IPs on loopback (requires sudo)
+termux_loopback_ips: []
+
 termux_internal_networks:
   - '127.0.0.*'
-  - '10.33.*.*'
   - '192.168.*.*'
 
 termux_ssh_config: |

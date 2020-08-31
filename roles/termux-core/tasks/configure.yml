@@ -3,12 +3,14 @@
   template:
     src: termux/sshd.config
     dest: "{{ termux_root_dir }}/usr/etc/ssh/sshd_config"
+    mode: 0644
 
 - name: create host marker
   copy:
     content: "{{ inventory_hostname }}"
     dest: "{{ ansible_user_dir }}/{{ inventory_hostname }}"
     force: true
+    mode: 0644
 
 - name: setup storage
   command:
@@ -22,6 +24,7 @@
     content: |
       #!{{ termux_root_dir }}/usr/bin/sh
     force: false
+    mode: 0644
 
 - name: make aliases in user profile, add /system/bin on PATH
   blockinfile:
@@ -33,6 +36,7 @@
     path: "{{ ansible_user_dir }}/.tmux.conf"
     line: "{{ item }}"
     create: true
+    mode: 0644
   loop: "{{ termux_tmux_options }}"
 
 

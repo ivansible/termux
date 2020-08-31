@@ -15,6 +15,7 @@
       copy:
         src: "{{ termux_ubuntu_noaudit_proot }}"
         dest: "{{ proot_noaudit_deb }}"
+        mode: 0644
       register: fix_proot_audit_log
 
     - name: install proot mod that emulates absent audit log
@@ -134,6 +135,7 @@
   template:
     src: ubuntu/sshd.config
     dest: "{{ ubuntu_fs }}/etc/ssh/sshd_config"
+    mode: 0644
   register: _sshd_config
 
 - name: restart sshd in proot ubuntu

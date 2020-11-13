@@ -93,6 +93,9 @@ termux_packages_x11:
   - xorg-xhost
 
 termux_pkg_confirm: "y{{ '\n' * 20 }}"
+termux_pkg_opts: '-q -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"'
+termux_pkg_env:
+  DEBIAN_FRONTEND: noninteractive
 termux_pkg_changed: 'packages will be installed'
 
 termux_svc_dir: "{{ termux_root_dir }}/usr/var/service"

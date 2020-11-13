@@ -80,7 +80,7 @@
   ## end of block
   vars:
     systemd_postinst: "{{ ubuntu_fs }}/var/lib/dpkg/info/systemd.postinst"
-    stdout: "{{ _apt_result.stdout |default('') }}"
+    stdout: "{{ _apt_result.stdout |d('') }}"
   when: stdout is search('error processing package systemd|Affected packages. systemd')
 
 

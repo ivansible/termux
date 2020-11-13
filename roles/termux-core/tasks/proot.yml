@@ -2,11 +2,11 @@
 ## adopted from https://github.com/Neo-Oli/termux-ubuntu/blob/master/ubuntu.sh
 
 - name: install proot
-  command: "pkg install -qy proot wget"
-  environment:
-    DEBIAN_FRONTEND: noninteractive
+  command: "pkg install {{ termux_pkg_opts }} proot wget"
+  environment: "{{ termux_pkg_env }}"
   register: pkg_result
-  changed_when: pkg_result.stdout |default('') is search(termux_pkg_changed)
+  until: pkg_result is successful
+  changed_when: pkg_result.stdout |d('') is search(termux_pkg_changed)
 
 - name: create directory for ubuntu proot
   file:
@@ -59,7 +59,7 @@
 - name: set default absolute path of sdcard
   set_fact:
     termux_sdcard_dir_abspath: "{{ termux_sdcard_dir }}"
-  when: not termux_sdcard_abspath |default('',true)
+  when: not termux_sdcard_abspath |d('',true)
   tags: termux_core_sdcard
 
 - name: detect absolute path of sdcard mount point

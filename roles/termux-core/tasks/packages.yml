@@ -1,10 +1,10 @@
 ---
 - name: install termux utilities
-  command: "pkg install -qy {{ termux_packages_core |join(' ') }}"
-  environment:
-    DEBIAN_FRONTEND: noninteractive
+  command: "pkg install {{ termux_pkg_opts }} {{ termux_packages_core |join(' ') }}"
+  environment: "{{ termux_pkg_env }}"
   register: pkg_result
-  changed_when: pkg_result.stdout |default('') is search(termux_pkg_changed)
+  until: pkg_result is successful
+  changed_when: pkg_result.stdout |d('') is search(termux_pkg_changed)
 
 - name: prevent termux from sleep during setup
   command: termux-wake-lock
@@ -12,29 +12,29 @@
   when: ansible_connection != 'docker'
 
 - name: add x11 repository
-  command: "pkg install -qy x11-repo"
-  environment:
-    DEBIAN_FRONTEND: noninteractive
+  command: "pkg install {{ termux_pkg_opts }} x11-repo"
+  environment: "{{ termux_pkg_env }}"
   register: pkg_result
-  changed_when: pkg_result.stdout |default('') is search(termux_pkg_changed)
+  until: pkg_result is successful
+  changed_when: pkg_result.stdout |d('') is search(termux_pkg_changed)
   when: termux_x11 |bool
 
 - name: install x11 programs
-  command: "pkg install -qy {{ termux_packages_x11 |join(' ') }}"
-  environment:
-    DEBIAN_FRONTEND: noninteractive
+  command: "pkg install {{ termux_pkg_opts }} {{ termux_packages_x11 |join(' ') }}"
+  environment: "{{ termux_pkg_env }}"
   register: pkg_result
-  changed_when: pkg_result.stdout |default('') is search(termux_pkg_changed)
+  until: pkg_result is successful
+  changed_when: pkg_result.stdout |d('') is search(termux_pkg_changed)
   when: termux_x11 |bool
 
 - name: upgrade termux packages
   command:
-    cmd: pkg upgrade
+    cmd: "pkg upgrade {{ termux_pkg_opts }}"
     stdin: "{{ termux_pkg_confirm }}"
-  environment:
-    DEBIAN_FRONTEND: noninteractive
+  environment: "{{ termux_pkg_env }}"
   register: pkg_result
-  changed_when: pkg_result.stdout |default('') is search(termux_pkg_changed)
+  until: pkg_result is successful
+  changed_when: pkg_result.stdout |d('') is search(termux_pkg_changed)
   ignore_errors: true
   when: termux_upgrade |bool
 ...

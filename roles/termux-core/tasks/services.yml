@@ -3,26 +3,27 @@
 ## https://wiki.termux.com/wiki/Termux-services
 
 - name: install termux service framwork
-  command: "pkg install -qy termux-services"
-  environment:
-    DEBIAN_FRONTEND: noninteractive
+  command: "pkg install {{ termux_pkg_opts }} termux-services"
+  environment: "{{ termux_pkg_env }}"
   register: _services_install
-  changed_when: _services_install.stdout |default('') is search(termux_pkg_changed)
+  until: _services_install is successful
+  changed_when: _services_install.stdout |d('') is search(termux_pkg_changed)
 
 - name: setup ssh service directory
   shell:
     cmd: |
-      pkg uninstall -qy openssh
-      pkg install   -qy openssh
+      pkg uninstall {{ termux_pkg_opts }} openssh
+      pkg install   {{ termux_pkg_opts }} openssh
     creates: "{{ termux_svc_dir }}/sshd"
-  environment:
-    DEBIAN_FRONTEND: noninteractive
+  environment: "{{ termux_pkg_env }}"
 
 - name: activate termux service daemon
   command: service-daemon restart
   environment:
     SVDIR: "{{ termux_svc_dir }}"
     LOGDIR: "{{ termux_log_dir }}"
+  register: _services_restart
+  until: _services_restart is successful
   when: _services_install is changed
 
 

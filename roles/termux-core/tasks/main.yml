@@ -26,7 +26,7 @@
 
 - name: setup ubuntu image in termux proot
   import_tasks: proot.yml
-  when: termux_ubuntu |default('')
+  when: termux_ubuntu |d('')
   tags:
     - termux_proot
     - termux_ubuntu_bootstrap
@@ -34,13 +34,13 @@
   vars:
     ubuntu_fs: "{{ termux_ubuntu_fs }}"
     start_script: "{{ termux_ubuntu_start_script }}"
-    codename: "{{ termux_ubuntu |default('bionic') }}"
+    codename: "{{ termux_ubuntu |d('bionic') }}"
     image_host: "{{ termux_ubuntu_image_host }}"
     tarball: "{{ termux_ubuntu_dir }}/image.tgz"
 
 - name: bootstrap ubuntu in termux
   import_tasks: ubuntu-bootstrap.yml
-  when: termux_ubuntu |default('')
+  when: termux_ubuntu |d('')
   tags:
     - termux_ubuntu_bootstrap
     - termux_ubuntu

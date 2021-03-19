@@ -4,6 +4,8 @@
   pre_tasks:
     - name: vars
       include_vars: vars.yml
+      tags: always
   roles:
-    - role: ivansible.lin_core
+    - ivansible.termux_bootstrap
+    - ivansible.termux_core
 ...

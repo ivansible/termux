@@ -2,10 +2,10 @@
 - src: https://github.com/ivansible/lin-base
   name: ivansible.lin_base
   scm: git
-- src: https://github.com/ivansible/lin-core
-  name: ivansible.lin_core
+- src: https://github.com/ivansible/termux-bootstrap
+  name: ivansible.termux_bootstrap
   scm: git
-- src: https://github.com/ivansible/lin-ferm
-  name: ivansible.lin_ferm
+- src: https://github.com/ivansible/termux-core
+  name: ivansible.termux_core
   scm: git
 ...

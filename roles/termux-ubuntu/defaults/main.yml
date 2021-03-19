@@ -1,4 +1,6 @@
 ---
+termux_mini: false
+
 termuntu_system_locale: ~
 termuntu_timezone: ~
 termuntu_hostname: "{{ inventory_hostname }}"

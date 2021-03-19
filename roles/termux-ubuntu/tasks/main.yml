@@ -2,6 +2,7 @@
 - name: perform root setup of ubuntu in termux
   import_tasks: root.yml
   become: true
+  when: not termux_mini |bool
   tags:
     - termux_ubuntu_all
     - termuntu_all
@@ -9,7 +10,9 @@
 - name: setup gui
   import_tasks: gui.yml
   become: true
-  when: termuntu_install_gui |bool
+  when:
+    - termuntu_install_gui |bool
+    - not termux_mini |bool
   tags:
     - termux_ubuntu_gui
     - termuntu_all

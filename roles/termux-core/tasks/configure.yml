@@ -12,10 +12,22 @@
     force: true
     mode: 0644
 
-- name: setup storage
-  command:
-    cmd: termux-setup-storage
-    creates: "{{ ansible_user_dir }}/storage"
+- name: setup storage if not docker test
+  block:
+    - name: setup storage
+      command:
+        cmd: termux-setup-storage
+        creates: "{{ ansible_user_dir }}/storage"
+
+    - name: check setup storage restults
+      stat:
+        path: "{{ ansible_user_dir }}/storage"
+      register: _storage_dir
+
+    - name: print storage access warning
+      debug:
+        msg: "**** Please allow termux to access storage ****"
+      when: not _storage_dir.stat.exists
   when: ansible_connection != 'docker'
 
 - name: create new user profile

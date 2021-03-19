@@ -1,4 +1,6 @@
 ---
+termux_mini: false
+
 ## vdisk and shmem require rooted android
 termux_shmem: false
 termux_vdisk: false

@@ -22,7 +22,9 @@
     get_checksum: false
     get_mime: false
   register: _termux_vdisk_file
-  when: termux_vdisk |bool
+  when:
+    - termux_vdisk |bool
+    - not termux_mini |bool
   tags:
     - termux_boostrap_vdisk
     - termux_boostrap_all
@@ -32,13 +34,16 @@
   when:
     - termux_vdisk |bool
     # - not _termux_vdisk_file.stat.exists
+    - not termux_mini |bool
   tags:
     - termux_boostrap_vdisk
     - termux_boostrap_all
 
 - name: setup /dev/shm (required by ubuntu)
   import_tasks: shmem.yml
-  when: termux_shmem |bool
+  when:
+    - termux_shmem |bool
+    - not termux_mini |bool
   tags:
     - termux_shmem_all
     - termux_boostrap_shmem

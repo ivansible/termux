@@ -26,7 +26,9 @@
 
 - name: setup ubuntu image in termux proot
   import_tasks: proot.yml
-  when: termux_ubuntu |d('')
+  when:
+    - termux_ubuntu |d('')
+    - not termux_mini |bool
   tags:
     - termux_proot
     - termux_ubuntu_bootstrap
@@ -40,7 +42,9 @@
 
 - name: bootstrap ubuntu in termux
   import_tasks: ubuntu-bootstrap.yml
-  when: termux_ubuntu |d('')
+  when:
+    - termux_ubuntu |d('')
+    - not termux_mini |bool
   tags:
     - termux_ubuntu_bootstrap
     - termux_ubuntu

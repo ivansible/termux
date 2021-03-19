@@ -1,4 +1,5 @@
 ---
+termux_mini: false
 termux_upgrade: true
 termux_x11: false
 

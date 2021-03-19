@@ -17,7 +17,9 @@
   register: pkg_result
   until: pkg_result is successful
   changed_when: pkg_result.stdout |d('') is search(termux_pkg_changed)
-  when: termux_x11 |bool
+  when:
+    - termux_x11 |bool
+    - not termux_mini |bool
 
 - name: install x11 programs
   command: "pkg install {{ termux_pkg_opts }} {{ termux_packages_x11 |join(' ') }}"
@@ -25,7 +27,9 @@
   register: pkg_result
   until: pkg_result is successful
   changed_when: pkg_result.stdout |d('') is search(termux_pkg_changed)
-  when: termux_x11 |bool
+  when:
+    - termux_x11 |bool
+    - not termux_mini |bool
 
 - name: upgrade termux packages
   command:
@@ -36,5 +40,7 @@
   until: pkg_result is successful
   changed_when: pkg_result.stdout |d('') is search(termux_pkg_changed)
   ignore_errors: true
-  when: termux_upgrade |bool
+  when:
+    - termux_upgrade |bool
+    - not termux_mini |bool
 ...

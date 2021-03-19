@@ -11,6 +11,7 @@
     regexp: "^{{ item }}="
     line: "{{ item }}={{ termuntu_system_locale }}"
     create: true
+    mode: 0644
   loop: [LANG, LANGUAGE]
   when: termuntu_system_locale |default('')
 
@@ -20,6 +21,7 @@
     regexp: "^{{ item }}="
     line: "{{ item }}={{ termuntu_system_locale }}"
     create: true
+    mode: 0644
   loop: [LANG, LANGUAGE]
   when:
     - termuntu_system_locale |default('')
@@ -33,6 +35,8 @@
         dest: /etc/timezone
         content: |
           {{ termuntu_timezone }}
+        force: false
+        mode: 0644
 
     - name: setup timezone data
       file:
@@ -49,6 +53,8 @@
         dest: /etc/hostname
         content: |
           {{ termuntu_hostname }}
+        force: false
+        mode: 0644
 
     - name: configure loopback address for hostname
       lineinfile:

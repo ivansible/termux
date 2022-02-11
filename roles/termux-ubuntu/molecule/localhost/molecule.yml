@@ -1,4 +1,26 @@
 ---
+provisioner:
+  name: ansible
+  inventory:
+    group_vars:
+      molecule:
+  playbooks:
+    prepare: ../default/prepare.yml
+    converge: ../default/converge.yml
+  config_options:
+    defaults:
+      strategy: linear
+      verbosity: 1
+  lint:
+    name: ansible-lint
+verifier:
+  name: testinfra
+  lint:
+    name: flake8
+    options:
+      max-line-length: 120
+  directory:
+    ../default/tests
 dependency:
   name: galaxy
   options:
@@ -13,30 +35,20 @@ platforms:
   - name: localhost
     groups:
       - molecule
-provisioner:
-  name: ansible
-  inventory:
-    group_vars:
-      molecule:
-  playbooks:
-    prepare: ../default/prepare.yml
-    converge: ../default/converge.yml
-    verify: ../default/verify.yml
-  lint:
-    name: ansible-lint
-verifier:
-  name: ansible
-  lint:
-    name: ansible-lint
-    enabled: false
 scenario:
   name: localhost
   test_sequence:
     - lint
     - dependency
+    # - cleanup
+    # - destroy
     - syntax
+    # - create
     - prepare
     - converge
     - idempotence
+    # - side_effect
     - verify
+    # - cleanup
+    # - destroy
 ...

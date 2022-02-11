@@ -12,6 +12,7 @@
   file:
     state: directory
     path: "{{ ubuntu_fs }}"
+    mode: 0755
 
 - name: add image host to dns resolver in docker termux
   ## add image host name in static hosts, see:

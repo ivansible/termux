@@ -66,6 +66,7 @@
   file:
     state: directory
     path: "{{ ansible_user_dir }}/.termux/boot"
+    mode: 0755
 
 - name: create link for termux autostart script
   file:

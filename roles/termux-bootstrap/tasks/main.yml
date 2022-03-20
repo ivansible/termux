@@ -6,7 +6,7 @@
   when: ansible_connection == 'docker'
   tags:
     - termux_bootstrap_docker
-    - termux_boostrap_all
+    - termux_bootstrap_all
 
 - name: install python
   raw: "command -v python || pkg install -qy python"
@@ -14,7 +14,7 @@
   changed_when: pkg_result.stdout |default('') is search(termux_pkg_changed)
   tags:
     - termux_bootstrap_python
-    - termux_boostrap_all
+    - termux_bootstrap_all
 
 - name: check whether termux disk image already exists
   stat:
@@ -26,8 +26,8 @@
     - termux_vdisk |bool
     - not termux_mini |bool
   tags:
-    - termux_boostrap_vdisk
-    - termux_boostrap_all
+    - termux_bootstrap_vdisk
+    - termux_bootstrap_all
 
 - name: remount termux on large virtual disk
   import_tasks: vdisk.yml
@@ -36,8 +36,8 @@
     # - not _termux_vdisk_file.stat.exists
     - not termux_mini |bool
   tags:
-    - termux_boostrap_vdisk
-    - termux_boostrap_all
+    - termux_bootstrap_vdisk
+    - termux_bootstrap_all
 
 - name: setup /dev/shm (required by ubuntu)
   import_tasks: shmem.yml
@@ -46,6 +46,6 @@
     - not termux_mini |bool
   tags:
     - termux_shmem_all
-    - termux_boostrap_shmem
-    - termux_boostrap_all
+    - termux_bootstrap_shmem
+    - termux_bootstrap_all
 ...

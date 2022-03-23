@@ -85,7 +85,7 @@
 
 - name: disable telemetry on bionic+
   import_role:
-    name: ivansible.lin_core
+    name: ivansible.linux.core
     tasks_from: telemetry.yml
   when: ansible_lsb.release is version('18.04','>=')
 ...

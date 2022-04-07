@@ -1,0 +1,32 @@
+---
+all:
+  children:
+    molecule:
+      children:
+        docker_molecule:
+        local_molecule:
+      vars:
+        ## use numeric id as workaround for below error:
+        ## "linux spec user: Unable to find user"
+        ## note: group MUST be present to prevent motd ownership errors
+        ansible_user: 1000:1000
+
+        ## ssh port to test locally
+        ansible_port: 55022
+
+        termux_shmem: false
+        termux_vdisk: false
+
+        termux_mini: false
+        termux_x11: true
+        termux_upgrade: true
+
+        termux_ssh_autostart: true
+        termux_wakelock_autostart: false
+        termux_ubuntu_ssh_autostart: false
+
+        termux_ssh_keys_accept:
+          - "{{ lookup('env','MOLECULE_SCENARIO_DIRECTORY') }}/files/vagrant.key"
+
+        termux_ubuntu: ~
+...

@@ -1,0 +1,8 @@
+---
+- name: converge
+  hosts: all
+  strategy: linear
+  gather_facts: false
+  roles:
+    - ivansible.termux.bootstrap
+...

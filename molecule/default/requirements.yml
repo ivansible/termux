@@ -1,0 +1,5 @@
+---
+collections:
+  - git+https://github.com/ivansible/base
+  - git+https://github.com/ivansible/linux
+...

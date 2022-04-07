@@ -1,0 +1,9 @@
+---
+- name: verify
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: no test yet
+      debug:
+        msg: 'TEST FINISHED.'
+...

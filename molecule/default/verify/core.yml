@@ -1,0 +1,28 @@
+---
+- name: verify
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: perform ssh login into termux and list home files
+      command:
+        cmd: >
+          ssh -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null
+              -p{{ ansible_port }} -i{{ ssh_key }} termux@localhost
+              ls -lAR
+      delegate_to: localhost
+      vars:
+        ssh_key: "{{ termux_ssh_keys_accept[0] }}"
+      register: result
+    - name: assert that required files are present
+      assert:
+        that:
+          - output is search('autostart')
+          - output is search('termux.core')
+          - output is search('.tmux.conf')
+          - output is search('authorized_keys')
+      vars:
+        output: "{{ result.stdout |d('') }}"
+    - name: report success
+      debug:
+        msg: TEST PASSED.
+...

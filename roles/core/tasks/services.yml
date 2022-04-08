@@ -18,16 +18,22 @@
   environment: "{{ termux_pkg_env }}"
 
 - name: activate termux service daemon
-  command: service-daemon restart
+  command:
+    cmd: service-daemon start
+    creates: "{{ termux_root_dir }}/usr/var/run/service-daemon.pid"
   environment:
     SVDIR: "{{ termux_svc_dir }}"
     LOGDIR: "{{ termux_log_dir }}"
-  register: _services_restart
-  until: _services_restart is successful
-  when: _services_install is changed
+  register: _services_activate
+  until: _services_activate is successful
+  delay: 2
 
+- name: wait a little for service daemon to warm up
+  wait_for:
+    timeout: 5
+  when: _services_activate is changed
 
-- name: enable termux ssh service
+- name: enable termux ssh service (unless disabled)
   command:
     cmd: sv-enable sshd
     removes: "{{ termux_svc_dir }}/sshd/down"
@@ -36,7 +42,7 @@
     LOGDIR: "{{ termux_log_dir }}"
   when: termux_ssh_autostart |bool
 
-- name: disable termux ssh service
+- name: disable termux ssh service (unless enabled)
   command:
     cmd: sv-disable sshd
     creates: "{{ termux_svc_dir }}/sshd/down"
@@ -45,6 +51,22 @@
     LOGDIR: "{{ termux_log_dir }}"
   when: not termux_ssh_autostart |bool
 
+- name: restart termux service daemon (as needed)
+  block:
+    - name: restart termux service daemon if config changed (will report if it fails)
+      command: timeout 10 service-daemon restart
+      environment:
+        SVDIR: "{{ termux_svc_dir }}"
+        LOGDIR: "{{ termux_log_dir }}"
+      register: _services_restart
+      until: _services_restart is successful
+  rescue:
+    - name: report failed service daemon restart
+      debug:
+        msg: service daemon failed to restart (ignored)
+  when:
+    - _services_install is changed
+    - _services_activate is not changed
 
 - name: make termux autostart script
   template:

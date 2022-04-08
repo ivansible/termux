@@ -101,6 +101,7 @@ termux_pkg_opts: '-q -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::=
 termux_pkg_env:
   DEBIAN_FRONTEND: noninteractive
 termux_pkg_changed: 'packages will be installed'
+termux_pkg_upgraded: 'following packages will be upgraded'
 
 termux_svc_dir: "{{ termux_root_dir }}/usr/var/service"
 termux_log_dir: "{{ termux_root_dir }}/usr/var/log"

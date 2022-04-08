@@ -39,7 +39,7 @@
   register: pkg_result
   until: pkg_result is successful
   changed_when: pkg_result.stdout |d('') is search(termux_pkg_changed)
-  ignore_errors: true
+  failed_when: false
   when:
     - termux_upgrade |bool
     - not termux_mini |bool

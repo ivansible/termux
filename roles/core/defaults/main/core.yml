@@ -46,6 +46,7 @@ termux_internal_networks:
   - '127.0.0.*'
   - '192.168.*.*'
 
+termux_ssh_config_hosts: []
 termux_ssh_config: |
   Host localhost
     Hostname 127.0.0.1

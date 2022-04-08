@@ -43,7 +43,7 @@
   vars:
     cmd: "apt-get -qy update; apt-get -qy install {{ core_packages_args }}"
   register: _apt_result
-  ignore_errors: true
+  failed_when: false
 
 - name: fix systemd install issues
   block:

@@ -42,9 +42,13 @@ termux_tmux_options:
 ## configure IPs on loopback (requires sudo)
 termux_loopback_ips: []
 
+## by default allow ssh login only by public key, only from private addresses
 termux_internal_networks:
   - '127.0.0.*'
   - '192.168.*.*'
+  - '172.16.*.*'
+  - '172.17.*.*'
+  - '10.*.*.*'
 
 termux_ssh_config_hosts: []
 termux_ssh_config: |

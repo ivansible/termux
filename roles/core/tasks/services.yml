@@ -54,6 +54,7 @@
 - name: restart termux service daemon (as needed)
   block:
     - name: restart termux service daemon if config changed (will report if it fails)
+      # noqa no-changed-when
       command: timeout 10 service-daemon restart
       environment:
         SVDIR: "{{ termux_svc_dir }}"

@@ -72,6 +72,7 @@
         when: stdout is search('/etc/resolv.conf.* are the same file')
 
     - name: retry installing core packages in proot ubuntu
+      # noqa no-changed-when
       command: "{{ start_script }} '{{ cmd }}'"
       vars:
         cmd: "apt-get -qy update; apt-get -qy install {{ core_packages_args }}"
@@ -122,7 +123,7 @@
     key: "{{ lookup('pipe', keygen_cmd) }}"
     comment: "{{ item.1 |basename |regex_replace('[.]key$') }}"
   vars:
-    # use '&&' in the pipe to fail on chmod errors
+    ## use '&&' in the pipe to fail on chmod errors
     keygen_cmd: 'chmod 600 "{{ item.1 }}" && ssh-keygen -y -f "{{ item.1 }}"'
     homes:
       - /root

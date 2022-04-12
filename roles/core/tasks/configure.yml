@@ -28,7 +28,7 @@
       debug:
         msg: "**** Please allow termux to access storage ****"
       when: not _storage_dir.stat.exists
-  when: ansible_connection != 'docker'
+  when: ansible_connection is not search('docker')
 
 - name: create new user profile
   copy:

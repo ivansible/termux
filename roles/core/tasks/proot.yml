@@ -31,7 +31,7 @@
     - name: update static dns in docker termux
       command: /system/bin/update-static-dns
       when: _static_dns_hosts is changed
-  when: ansible_connection == 'docker'
+  when: ansible_connection is search('docker')
 
 - name: download ubuntu image
   shell:

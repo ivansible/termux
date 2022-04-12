@@ -9,7 +9,7 @@
 - name: prevent termux from sleep during setup
   command: termux-wake-lock
   changed_when: false
-  when: ansible_connection != 'docker'
+  when: ansible_connection is not search('docker')
 
 - name: add x11 repository
   command: "pkg install {{ termux_pkg_opts }} x11-repo"

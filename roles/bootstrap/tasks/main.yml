@@ -3,7 +3,7 @@
   raw: "grep -q termux.net /system/etc/hosts || /system/bin/update-static-dns"
   register: cmd_result
   changed_when: cmd_result.stdout |default('') is search(termux_pkg_changed)
-  when: ansible_connection == 'docker'
+  when: ansible_connection is search('docker')
   tags:
     - termux_bootstrap_docker
     - termux_bootstrap_all

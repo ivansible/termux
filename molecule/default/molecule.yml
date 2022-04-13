@@ -52,6 +52,8 @@ platforms:
     ## set DOCKER_TERMUX_ARCH=aarch64 on arm64 hosts
     image: kcubeterm/termux:${DOCKER_TERMUX_ARCH:-x86_64}
     ## override the default cmd script which would exit without terminal
+    ## the image provides cozy symlink /bin -> /data/data/com.termux/files/usr/bin
+    ## thus `/bin/sh -c` will work with ansible `raw` module and `docker exec`
     command: sleep infinity
     ## publish sshd port for termux to test locally
     published_ports:

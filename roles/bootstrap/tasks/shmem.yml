@@ -5,7 +5,7 @@
 - name: create /dev/shm (required by prooted ubuntu)
   block:
     - name: create /dev/shm (ok to fail, will rescue)
-      file:
+      ansible.builtin.file:
         path: /dev/shm
         state: directory
         owner: root
@@ -16,12 +16,12 @@
 
   rescue:
     - name: install "su"
-      raw: "command -v su || pkg install -qy termux-tools"
+      ansible.builtin.raw: "command -v su || pkg install -qy termux-tools"
       register: pkg_result
       changed_when: pkg_result.stdout |default('') is search(termux_pkg_changed)
 
     - name: create /dev/shm (via "su")
-      command:
+      ansible.builtin.command:
         cmd: su -c "mkdir -p /dev/shm; chmod 1777 /dev/shm"
         creates: /dev/shm
 ...

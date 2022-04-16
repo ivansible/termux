@@ -1,18 +1,20 @@
 ---
 - name: install termux utilities
-  command: "pkg install {{ termux_pkg_opts }} {{ termux_packages_core |join(' ') }}"
+  ansible.builtin.command:
+    cmd: "pkg install {{ termux_pkg_opts }} {{ termux_packages_core |join(' ') }}"
   environment: "{{ termux_pkg_env }}"
   register: pkg_result
   until: pkg_result is successful
   changed_when: pkg_result.stdout |d('') is search(termux_pkg_changed)
 
 - name: prevent termux from sleep during setup
-  command: termux-wake-lock
+  ansible.builtin.command: termux-wake-lock
   changed_when: false
   when: ansible_connection is not search('docker')
 
 - name: add x11 repository
-  command: "pkg install {{ termux_pkg_opts }} x11-repo"
+  ansible.builtin.command:
+    cmd: "pkg install {{ termux_pkg_opts }} x11-repo"
   environment: "{{ termux_pkg_env }}"
   register: pkg_result
   until: pkg_result is successful
@@ -22,7 +24,8 @@
     - not termux_mini |bool
 
 - name: install x11 programs
-  command: "pkg install {{ termux_pkg_opts }} {{ termux_packages_x11 |join(' ') }}"
+  ansible.builtin.command:
+    cmd: "pkg install {{ termux_pkg_opts }} {{ termux_packages_x11 |join(' ') }}"
   environment: "{{ termux_pkg_env }}"
   register: pkg_result
   until: pkg_result is successful
@@ -32,7 +35,7 @@
     - not termux_mini |bool
 
 - name: upgrade termux packages
-  command:
+  ansible.builtin.command:
     cmd: "pkg upgrade {{ termux_pkg_opts }}"
     stdin: "{{ termux_pkg_confirm }}"
   environment: "{{ termux_pkg_env }}"

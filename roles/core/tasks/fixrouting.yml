@@ -1,35 +1,35 @@
 ---
 - name: make fixrouting script
-  template:
+  ansible.builtin.template:
     src: fixrouting/fixrouting.sh
     dest: "{{ ansible_user_dir }}/fixrouting"
     mode: 0750
 
 - name: make verification script
-  template:
+  ansible.builtin.template:
     src: fixrouting/verify.sh
     dest: "{{ ansible_user_dir }}/verify"
     mode: 0750
 
 - name: create directory for fixrouting widget
-  file:
+  ansible.builtin.file:
     state: directory
     path: "{{ ansible_user_dir }}/.shortcuts/tasks"
     mode: 0755
 
 - name: make link for fixrouting widget
-  file:
+  ansible.builtin.file:
     state: link
     src: "../../fixrouting"
     dest: "{{ ansible_user_dir }}/.shortcuts/tasks/fixrouting"
 
 - name: check whether termux widget is installed
-  stat:
+  ansible.builtin.stat:
     path: /data/data/com.termux.widget
   register: _termux_widget
 
 - name: remind user to install termux widget
-  debug:
+  ansible.builtin.debug:
     msg:
       - "+--------------------------------+"
       - "|  Please install Termux Widget  |"

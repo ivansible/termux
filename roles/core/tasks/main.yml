@@ -1,31 +1,31 @@
 ---
 - name: install termux packages
-  import_tasks: packages.yml
+  ansible.builtin.import_tasks: packages.yml
   tags:
     - termux_packages
     - termux_core_all
 
 - name: configure termux environment
-  import_tasks: configure.yml
+  ansible.builtin.import_tasks: configure.yml
   tags:
     - termux_configure
     - termux_core_all
 
 - name: setup fixrouting
-  import_tasks: fixrouting.yml
+  ansible.builtin.import_tasks: fixrouting.yml
   when: termux_fixrouting |bool
   tags:
     - termux_fixrouting
     - termux_core_all
 
 - name: setup termux services
-  import_tasks: services.yml
+  ansible.builtin.import_tasks: services.yml
   tags:
     - termux_services
     - termux_core_all
 
 - name: setup ubuntu image in termux proot
-  import_tasks: proot.yml
+  ansible.builtin.import_tasks: proot.yml
   when:
     - termux_ubuntu |d('')
     - not termux_mini |bool
@@ -41,7 +41,7 @@
     tarball: "{{ termux_ubuntu_dir }}/image.tgz"
 
 - name: bootstrap ubuntu in termux
-  import_tasks: ubuntu-bootstrap.yml
+  ansible.builtin.import_tasks: ubuntu-bootstrap.yml
   when:
     - termux_ubuntu |d('')
     - not termux_mini |bool
@@ -55,6 +55,6 @@
     core_packages_args: "{{ termux_ubuntu_core_packages |join(' ') }}"
 
 - name: run postponed handlers now
-  meta: flush_handlers
+  ansible.builtin.meta: flush_handlers
   tags: always
 ...

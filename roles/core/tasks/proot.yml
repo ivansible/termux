@@ -2,14 +2,15 @@
 ## adopted from https://github.com/Neo-Oli/termux-ubuntu/blob/master/ubuntu.sh
 
 - name: install proot
-  command: "pkg install {{ termux_pkg_opts }} proot wget"
+  ansible.builtin.command:
+    cmd: "pkg install {{ termux_pkg_opts }} proot wget"
   environment: "{{ termux_pkg_env }}"
   register: pkg_result
   until: pkg_result is successful
   changed_when: pkg_result.stdout |d('') is search(termux_pkg_changed)
 
 - name: create directory for ubuntu proot
-  file:
+  ansible.builtin.file:
     state: directory
     path: "{{ ubuntu_fs }}"
     mode: 0755
@@ -19,7 +20,7 @@
   ## https://github.com/xeffyr/termux-docker#known-issues
   block:
     - name: add static hostname in docker termux
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: /system/etc/static-dns-hosts.txt
         line: "{{ image_host }}"
         ## docker does not allow atomic updates of /etc/hosts
@@ -29,12 +30,12 @@
       register: _static_dns_hosts
 
     - name: update static dns in docker termux
-      command: /system/bin/update-static-dns
+      ansible.builtin.command: /system/bin/update-static-dns
       when: _static_dns_hosts is changed
   when: ansible_connection is search('docker')
 
 - name: download ubuntu image
-  shell:
+  ansible.builtin.shell:
     cmd: |
       case $(dpkg --print-architecture) in
         aarch64)  arch="arm64" ;;
@@ -51,27 +52,27 @@
     url: "{{ base_url }}/ubuntu-{{ codename }}-core-cloudimg-${arch}-root.tar.gz"
 
 - name: decompress ubuntu image
-  command:
+  ansible.builtin.command:
     cmd: proot --link2symlink tar -xf "{{ tarball }}" --exclude=dev
     chdir: "{{ ubuntu_fs }}"
     creates: "{{ ubuntu_fs }}/bin/bash"
 
 
 - name: set default absolute path of sdcard
-  set_fact:
+  ansible.builtin.set_fact:
     termux_sdcard_dir_abspath: "{{ termux_sdcard_dir }}"
   when: not termux_sdcard_abspath |d('',true)
   tags: termux_core_sdcard
 
 - name: detect absolute path of sdcard mount point
-  stat:
+  ansible.builtin.stat:
     path: "{{ termux_sdcard_dir }}"
   register: _termux_sdcard_dir_stat
   when: termux_sdcard_abspath is search('SDCARD_ID')
   tags: termux_core_sdcard
 
 - name: substitute path of sdcard mount point
-  set_fact:
+  ansible.builtin.set_fact:
     termux_sdcard_abspath: "{{ termux_sdcard_abspath |replace('SDCARD_ID',sdcard_id) }}"
   vars:
     link_target: "{{ _termux_sdcard_dir_stat.stat.lnk_target }}"
@@ -80,7 +81,7 @@
   tags: termux_core_sdcard
 
 - name: create proot launch script
-  template:
+  ansible.builtin.template:
     src: ubuntu/start-script.sh
     dest: "{{ start_script }}"
     mode: 0750

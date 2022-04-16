@@ -1,25 +1,26 @@
 ---
 - name: fix nameserver so ubuntu can connect to the internet
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "{{ ubuntu_fs }}/etc/resolv.conf"
     line: "nameserver {{ termux_ubuntu_nameserver }}"
 
 - name: fix sudo issue "unable to resolve host localhost"
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "{{ ubuntu_fs }}/etc/hosts"
     line: '127.0.0.1 localhost'
 
 - name: fix sudo/ssh failures due to android audit log
   block:
     - name: upload proot mod that emulates absent audit log
-      copy:
+      ansible.builtin.copy:
         src: "{{ termux_ubuntu_noaudit_proot }}"
         dest: "{{ proot_noaudit_deb }}"
         mode: 0644
       register: fix_proot_audit_log
 
     - name: install proot mod that emulates absent audit log
-      command: dpkg -i "{{ proot_noaudit_deb }}"
+      ansible.builtin.command:
+        cmd: dpkg -i "{{ proot_noaudit_deb }}"
       when: fix_proot_audit_log is changed
   vars:
     proot_noaudit_deb: "{{ termux_ubuntu_dir }}/proot_noaudit.deb"
@@ -29,7 +30,7 @@
   ## see:
   ## https://stackoverflow.com/questions/25193161/chfn-pam-system-error-intermittently-in-docker-hub-builds
   ## https://github.com/Neo-Oli/termux-ubuntu/issues/42
-  file:
+  ansible.builtin.file:
     state: link
     src: ../../bin/true
     dest: "{{ ubuntu_fs }}/usr/bin/chfn"
@@ -37,7 +38,7 @@
 
 
 - name: install core ubuntu packages (long task, errors will be fixed)
-  command:
+  ansible.builtin.command:
     cmd: "{{ start_script }} '{{ cmd }}'"
     creates: "{{ ubuntu_fs }}{{ termux_ubuntu_core_creates }}"
   vars:
@@ -48,7 +49,7 @@
 - name: fix systemd install issues
   block:
     - name: fix chfn issue with systemd-network user
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: "{{ systemd_postinst }}"
         regexp: '^(.*--gecos "systemd Network Management" systemd-network)\s*$'
         line: '\1 || true'
@@ -56,7 +57,7 @@
         when: stdout is search('chfn -f systemd Network Management .* returned error')
 
     - name: fix chfn issue with systemd-resolver user
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: "{{ systemd_postinst }}"
         regexp: '^(.*--gecos "systemd Resolver" systemd-resolve)\s*$'
         line: '\1 || true'
@@ -64,7 +65,7 @@
         when: stdout is search('chfn -f systemd Resolver .* returned error')
 
     - name: fix systemd issue with stub-resolv.conf
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: "{{ systemd_postinst }}"
         regexp: '^(\s*cp /etc/resolv.conf .*/stub-resolv.conf)\s*$'
         line: '\1 || true'
@@ -73,7 +74,8 @@
 
     - name: retry installing core packages in proot ubuntu
       # noqa no-changed-when
-      command: "{{ start_script }} '{{ cmd }}'"
+      ansible.builtin.command:
+        cmd: "{{ start_script }} '{{ cmd }}'"
       vars:
         cmd: "apt-get -qy update; apt-get -qy install {{ core_packages_args }}"
       register: _apt_result
@@ -86,7 +88,7 @@
 
 
 - name: create non-root ubuntu user
-  command:
+  ansible.builtin.command:
     cmd: "{{ start_script }} '{{ cmd }}'"
     stdin: "{{ termux_pkg_confirm }}"
     creates: "{{ ubuntu_fs }}{{ termux_ubuntu_home }}"
@@ -101,12 +103,12 @@
         "{{ termux_ubuntu_user }}"
 
 - name: fix /usr/bin/sudo permissions
-  file:
+  ansible.builtin.file:
     path: "{{ ubuntu_fs }}/usr/bin/sudo"
     mode: 04755
 
 - name: enable sudo for non-root ubuntu user
-  copy:
+  ansible.builtin.copy:
     dest: "{{ ubuntu_fs }}/etc/sudoers.d/99-nopasswd"
     content: |
       # ansible-managed
@@ -116,7 +118,7 @@
 
 
 - name: authorize ssh keys with ubuntu users
-  authorized_key:
+  ansible.posix.authorized_key:
     user: root  # fake user to avoid error in ansible module
     manage_dir: false
     path: "{{ ubuntu_fs }}/{{ item.0 }}/.ssh/authorized_keys"
@@ -133,7 +135,7 @@
     label: "{{ item.1 |basename }} -> {{ item.0 |basename }}"
 
 - name: configure sshd in proot ubuntu
-  template:
+  ansible.builtin.template:
     src: ubuntu/sshd.config
     dest: "{{ ubuntu_fs }}/etc/ssh/sshd_config"
     mode: 0644
@@ -141,6 +143,7 @@
 
 - name: restart sshd in proot ubuntu
   ## workaround for hung init.s script
-  shell: "nohup {{ start_script }} '/etc/init.d/ssh restart' >/dev/null 2>&1 &"
+  ansible.builtin.shell:
+    cmd: "nohup {{ start_script }} '/etc/init.d/ssh restart' >/dev/null 2>&1 &"
   when: _sshd_config is changed
 ...

@@ -3,14 +3,15 @@
 ## https://wiki.termux.com/wiki/Termux-services
 
 - name: install termux service framwork
-  command: "pkg install {{ termux_pkg_opts }} termux-services"
+  ansible.builtin.command:
+    cmd: "pkg install {{ termux_pkg_opts }} termux-services"
   environment: "{{ termux_pkg_env }}"
   register: _services_install
   until: _services_install is successful
   changed_when: _services_install.stdout |d('') is search(termux_pkg_changed)
 
 - name: setup ssh service directory
-  shell:
+  ansible.builtin.shell:
     cmd: |
       pkg uninstall {{ termux_pkg_opts }} openssh
       pkg install   {{ termux_pkg_opts }} openssh
@@ -18,7 +19,7 @@
   environment: "{{ termux_pkg_env }}"
 
 - name: activate termux service daemon
-  command:
+  ansible.builtin.command:
     cmd: service-daemon start
     creates: "{{ termux_root_dir }}/usr/var/run/service-daemon.pid"
   environment:
@@ -29,12 +30,12 @@
   delay: 2
 
 - name: wait a little for service daemon to warm up
-  wait_for:
+  ansible.builtin.wait_for:
     timeout: 5
   when: _services_activate is changed
 
 - name: enable termux ssh service (unless disabled)
-  command:
+  ansible.builtin.command:
     cmd: sv-enable sshd
     removes: "{{ termux_svc_dir }}/sshd/down"
   environment:
@@ -43,7 +44,7 @@
   when: termux_ssh_autostart |bool
 
 - name: disable termux ssh service (unless enabled)
-  command:
+  ansible.builtin.command:
     cmd: sv-disable sshd
     creates: "{{ termux_svc_dir }}/sshd/down"
   environment:
@@ -55,7 +56,8 @@
   block:
     - name: restart termux service daemon if config changed (will report if it fails)
       # noqa no-changed-when
-      command: timeout 10 service-daemon restart
+      ansible.builtin.command:
+        cmd: timeout 10 service-daemon restart
       environment:
         SVDIR: "{{ termux_svc_dir }}"
         LOGDIR: "{{ termux_log_dir }}"
@@ -63,14 +65,14 @@
       until: _services_restart is successful
   rescue:
     - name: report failed service daemon restart
-      debug:
+      ansible.builtin.debug:
         msg: service daemon failed to restart (ignored)
   when:
     - _services_install is changed
     - _services_activate is not changed
 
 - name: make termux autostart script
-  template:
+  ansible.builtin.template:
     src: services/autostart.sh
     dest: "{{ ansible_user_dir }}/autostart"
     mode: 0755
@@ -86,24 +88,24 @@
     - termux_shmem_all
 
 - name: create directory for termux autostart script
-  file:
+  ansible.builtin.file:
     state: directory
     path: "{{ ansible_user_dir }}/.termux/boot"
     mode: 0755
 
 - name: create link for termux autostart script
-  file:
+  ansible.builtin.file:
     state: link
     src: ../../autostart
     path: "{{ ansible_user_dir }}/.termux/boot/autostart"
 
 - name: check whether termux-boot is installed
-  stat:
+  ansible.builtin.stat:
     path: /data/data/com.termux.boot
   register: _termux_boot
 
 - name: remind user to install termux-boot
-  debug:
+  ansible.builtin.debug:
     msg:
       - "+------------------------------+"
       - "|  Please install Termux:Boot  |"

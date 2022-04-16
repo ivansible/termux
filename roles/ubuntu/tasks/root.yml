@@ -1,12 +1,12 @@
 ---
 - name: install core packages (long task)
-  apt:
+  ansible.builtin.apt:
     name: "{{ termuntu_core_packages }}"
     state: present
 
 - name: set system locale
   ## localectl fails because dbus is non-functional
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/default/locale
     regexp: "^{{ item }}="
     line: "{{ item }}={{ termuntu_system_locale }}"
@@ -16,7 +16,7 @@
   when: termuntu_system_locale |default('')
 
 - name: set system locale on trusty
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/profile.d/locale.sh
     regexp: "^{{ item }}="
     line: "{{ item }}={{ termuntu_system_locale }}"
@@ -31,7 +31,7 @@
   ## avoid timezone module warning about failing timedatectl
   block:
     - name: configure system timezone
-      copy:
+      ansible.builtin.copy:
         dest: /etc/timezone
         content: |
           {{ termuntu_timezone }}
@@ -39,7 +39,7 @@
         mode: 0644
 
     - name: setup timezone data
-      file:
+      ansible.builtin.file:
         state: link
         force: true
         dest: /etc/localtime
@@ -49,7 +49,7 @@
 - name: set hostname
   block:
     - name: set system hostname
-      copy:
+      ansible.builtin.copy:
         dest: /etc/hostname
         content: |
           {{ termuntu_hostname }}
@@ -57,7 +57,7 @@
         mode: 0644
 
     - name: configure loopback address for hostname
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: /etc/hosts
         line: "127.0.0.1 {{ termuntu_hostname }}"
   when: termuntu_hostname |default('')
@@ -65,16 +65,16 @@
 - name: give names to android groups
   block:
     - name: get all user groups
-      command: id -G
+      ansible.builtin.command: id -G
       changed_when: false
       register: _user_gids
 
     - name: get all system groups
-      getent:
+      ansible.builtin.getent:
         database: group
 
     - name: add absent groups
-      group:
+      ansible.builtin.group:
         name: "grp{{ item }}"
         gid: "{{ item }}"
       loop: "{{ user_gids |difference(sys_gids) }}"
@@ -84,7 +84,7 @@
   when: termuntu_name_android_groups |bool
 
 - name: disable telemetry on bionic+
-  import_role:
+  ansible.builtin.import_role:
     name: ivansible.linux.core
     tasks_from: telemetry.yml
   when: ansible_lsb.release is version('18.04','>=')
